@@ -1,138 +1,79 @@
 # 🍬 CottonCandy Proxy
 
-**棉花糖代理** - 通过浏览器身份免费使用 Gemini API 的 SillyTavern 代理方案。
+**棉花糖代理** - 通过浏览器身份免费使用 Gemini API
 
-> 基于 [AIStudioBuildProxy](https://github.com/starowo/AIStudioBuildProxy) 重构，感谢原作者 [@starowo](https://github.com/starowo) 的开源贡献！
-
----
-
-## ✨ 特性
-
-- 🍭 棉花糖配色 UI，清新可爱
-- 🔌 端口 8811/9111，与原版隔离可共存
-- 📦 结构清晰，易于维护
-- 🚀 一键启动，开箱即用
+> 基于 [AIStudioBuildProxy](https://github.com/starowo/AIStudioBuildProxy) 重构
 
 ---
 
-## 📁 项目结构
+## 🚀 一键安装
 
-```
-CottonCandy/
-├── applet/          # AI Studio Applet（核心引擎）
-│   ├── index.tsx    # 主逻辑
-│   ├── index.html   # 入口页面
-│   ├── index.css    # 样式
-│   └── metadata.json
-│
-├── server/          # Node.js 中转服务器
-│   ├── server.js    # 服务器核心
-│   ├── index.js     # SillyTavern 插件入口
-│   └── package.json
-│
-├── extension/       # SillyTavern 扩展（可选）
-│   ├── index.js     # 扩展逻辑
-│   ├── manifest.json
-│   └── style.css
-│
-└── README.md
-```
-
----
-
-## 🚀 安装步骤
-
-### 第一步：部署 Applet（在 AI Studio 中）
-
-1. 打开 [Google AI Studio](https://aistudio.google.com/)
-2. 确保已登录 Google 账号
-3. 创建新 Applet，将本仓库 `applet/` 文件夹中的文件上传
-4. 保存并获取 Applet 的 URL
-
-### 第二步：安装 Server（作为 SillyTavern 插件）
+在 Termux 或终端运行：
 
 ```bash
-# 进入 SillyTavern 插件目录
+curl -sL https://raw.githubusercontent.com/shleeshlee/CottonCandy-Proxy/main/install.sh | bash
+```
+
+安装完成后会显示下一步操作。
+
+---
+
+## 📖 手动安装
+
+如果一键安装失败，按以下步骤操作：
+
+### 1. 安装 Server
+
+```bash
 cd SillyTavern/plugins
-
-# 克隆仓库
-git clone https://github.com/shleeshlee/CottonCandy-Proxy CottonCandy
-
-# 安装依赖
-cd CottonCandy/server && npm install
+git clone https://github.com/shleeshlee/CottonCandy-Proxy.git CottonCandy
+cd CottonCandy/server
+npm install
 ```
 
-### 第三步：安装扩展（可选，用于在酒馆显示状态）
+### 2. 安装扩展（可选）
 
 ```bash
-# 进入 SillyTavern 扩展目录
-cd ~/SillyTavern/public/scripts/extensions/third-party
-
-# 创建软链接（推荐）
-ln -s ../../../plugins/CottonCandy/extension CottonCandy
-
-# 或者直接复制
-# cp -r /path/to/SillyTavern/plugins/CottonCandy/extension CottonCandy
+cp -r SillyTavern/plugins/CottonCandy/extension SillyTavern/public/scripts/extensions/third-party/CottonCandy
 ```
 
-> ⚠️ 记得修改 `extension/index.js` 中的 `APPLET_URL` 为你的 Applet 地址！
+### 3. 重启 SillyTavern
 
 ---
 
 ## 🎮 使用方法
 
-1. **启动 SillyTavern**（Server 插件会自动启动）
-2. **打开 AI Studio Applet**（通过扩展按钮或直接访问）
-3. **在 Applet 中点击「启动服务」**
-4. **在酒馆中选择代理**：设置 → Chat API → OpenAI → Proxy → 选择「棉花糖代理」
+1. **重启 SillyTavern**
+2. **在 AI Studio 创建 Applet**，上传 `applet/` 文件夹里的文件
+3. **打开 Applet** → 点击「启动服务」
+4. **酒馆设置代理**：API → OpenAI → Proxy → 选「棉花糖代理」
 
 ---
 
-## 🔌 端口说明
+## 🔌 端口
 
-| 服务 | 端口 | 说明 |
-|------|------|------|
-| HTTP | 8811 | 酒馆连接地址 |
-| WebSocket | 9111 | Applet 连接地址 |
-
----
-
-## 📋 工作原理
-
-```
-SillyTavern ──HTTP:8811──▶ Server (Node.js)
-                              │
-                              │ WebSocket:9111
-                              ▼
-                         Applet (AI Studio)
-                              │
-                              │ fetch with cookies
-                              ▼
-                         Gemini API
-```
+| 服务 | 端口 |
+|------|------|
+| HTTP | 8811 |
+| WebSocket | 9111 |
 
 ---
 
 ## ❓ 常见问题
 
-**Q: Applet 显示"未检测到登录"**  
-A: 请确保在同一浏览器中已登录 Google 账号。
-
 **Q: 酒馆显示"没有可用的浏览器连接"**  
-A: 请打开 Applet 页面并点击「启动服务」按钮。
+A: 打开 Applet 并点击「启动服务」
 
-**Q: 和原版 AIStudioBuildProxy 有什么区别？**  
-A: 端口不同（8811/9111 vs 8889/9998），UI 重构，可以同时安装互不干扰。
+**Q: Applet 显示"未检测到登录"**  
+A: 先在浏览器登录 Google 账号
 
 ---
 
 ## 🙏 致谢
 
-- [AIStudioBuildProxy](https://github.com/starowo/AIStudioBuildProxy) - 原版项目，本项目基于其核心思路重构
-- [SillyTavern](https://github.com/SillyTavern/SillyTavern) - 优秀的前端界面
+- [AIStudioBuildProxy](https://github.com/starowo/AIStudioBuildProxy)
+- [SillyTavern](https://github.com/SillyTavern/SillyTavern)
 
 ---
-
-## 📜 许可证
 
 MIT License
