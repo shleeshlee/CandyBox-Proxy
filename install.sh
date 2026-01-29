@@ -112,6 +112,12 @@ fi
 
 log_success "下载完成"
 
+# 复制入口文件到插件根目录（SillyTavern 要求）
+cp "$PLUGINS_DIR/CandyBox/server/package.json" "$PLUGINS_DIR/CandyBox/"
+cp "$PLUGINS_DIR/CandyBox/server/index.js" "$PLUGINS_DIR/CandyBox/"
+# 修复模块引用路径
+sed -i "s|require('./server')|require('./server/server')|g" "$PLUGINS_DIR/CandyBox/index.js"
+
 # ============================================
 # 5. 安装依赖
 # ============================================
