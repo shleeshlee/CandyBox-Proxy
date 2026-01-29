@@ -1,5 +1,5 @@
 {
-  "name": "CottonCandy Proxy",
-  "description": "棉花糖代理 - SillyTavern Gemini API 代理服务",
-  "version": "1.0.0"
+  "name": "CottonCandy",
+  "description": "An empty app",
+  "requestFramePermissions": []
 }
