@@ -2,6 +2,17 @@
 
 **棉花糖代理** - 通过浏览器身份免费使用 Gemini API 的 SillyTavern 代理方案。
 
+> 基于 [AIStudioBuildProxy](https://github.com/starowo/AIStudioBuildProxy) 重构，感谢原作者 [@starowo](https://github.com/starowo) 的开源贡献！
+
+---
+
+## ✨ 特性
+
+- 🍭 棉花糖配色 UI，清新可爱
+- 🔌 端口 8811/9111，与原版隔离可共存
+- 📦 结构清晰，易于维护
+- 🚀 一键启动，开箱即用
+
 ---
 
 ## 📁 项目结构
@@ -85,45 +96,47 @@ cp -r /path/to/CottonCandy/extension/* CottonCandy/
 
 | 服务 | 端口 | 说明 |
 |------|------|------|
-| HTTP | 8811 | 酒馆连接这个地址 |
-| WebSocket | 9111 | Applet 连接这个地址 |
+| HTTP | 8811 | 酒馆连接地址 |
+| WebSocket | 9111 | Applet 连接地址 |
 
 ---
 
-## 📋 数据流
+## 📋 工作原理
 
 ```
-SillyTavern (HTTP:8811)
-       ↓
-   Server (Node.js)
-       ↓ WebSocket:9111
-   Applet (AI Studio)
-       ↓ fetch with cookies
-   Gemini API
+SillyTavern ──HTTP:8811──▶ Server (Node.js)
+                              │
+                              │ WebSocket:9111
+                              ▼
+                         Applet (AI Studio)
+                              │
+                              │ fetch with cookies
+                              ▼
+                         Gemini API
 ```
 
 ---
 
 ## ❓ 常见问题
 
-**Q: Applet 显示"未检测到登录"**
+**Q: Applet 显示"未检测到登录"**  
 A: 请确保在同一浏览器中已登录 Google 账号。
 
-**Q: 酒馆显示"没有可用的浏览器连接"**
+**Q: 酒馆显示"没有可用的浏览器连接"**  
 A: 请打开 Applet 页面并点击「启动服务」按钮。
 
-**Q: HTTPS 页面无法连接 ws://**
-A: 这是浏览器的混合内容策略限制。Applet 需要在 AI Studio 的 HTTPS 环境中运行，会自动处理。
+**Q: 和原版 AIStudioBuildProxy 有什么区别？**  
+A: 端口不同（8811/9111 vs 8889/9998），UI 重构，可以同时安装互不干扰。
+
+---
+
+## 🙏 致谢
+
+- [AIStudioBuildProxy](https://github.com/starowo/AIStudioBuildProxy) - 原版项目，本项目基于其核心思路重构
+- [SillyTavern](https://github.com/SillyTavern/SillyTavern) - 优秀的前端界面
 
 ---
 
 ## 📜 许可证
 
 MIT License
-
----
-
-## 🙏 致谢
-
-- 原版 GeminiProxy 作者
-- SillyTavern 社区
