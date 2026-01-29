@@ -46,9 +46,8 @@ CottonCandy/
 
 1. 打开 [Google AI Studio](https://aistudio.google.com/)
 2. 确保已登录 Google 账号
-3. 点击左侧菜单 → **Build** → **Applet**
-4. 创建新 Applet，将 `applet/` 文件夹中的文件上传
-5. 保存并获取 Applet 的 URL（类似 `https://aistudio.google.com/prompts/xxx`）
+3. 创建新 Applet，将本仓库 `applet/` 文件夹中的文件上传
+4. 保存并获取 Applet 的 URL
 
 ### 第二步：安装 Server（作为 SillyTavern 插件）
 
@@ -56,14 +55,11 @@ CottonCandy/
 # 进入 SillyTavern 插件目录
 cd SillyTavern/plugins
 
-# 创建插件文件夹
-mkdir CottonCandy
-
-# 复制 server/ 文件夹内容到这里
-cp -r /path/to/CottonCandy/server/* CottonCandy/
+# 克隆仓库
+git clone https://github.com/shleeshlee/CottonCandy-Proxy CottonCandy
 
 # 安装依赖
-cd CottonCandy && npm install
+cd CottonCandy/server && npm install
 ```
 
 ### 第三步：安装扩展（可选，用于在酒馆显示状态）
@@ -72,14 +68,14 @@ cd CottonCandy && npm install
 # 进入 SillyTavern 扩展目录
 cd SillyTavern/public/scripts/extensions/third-party
 
-# 创建扩展文件夹
-mkdir CottonCandy
+# 创建软链接（推荐）
+ln -s ../../../plugins/CottonCandy/extension CottonCandy
 
-# 复制 extension/ 文件夹内容
-cp -r /path/to/CottonCandy/extension/* CottonCandy/
+# 或者直接复制
+# cp -r /path/to/SillyTavern/plugins/CottonCandy/extension CottonCandy
 ```
 
-**重要：** 记得修改 `extension/index.js` 中的 `APPLET_URL` 为你的 Applet 地址！
+> ⚠️ 记得修改 `extension/index.js` 中的 `APPLET_URL` 为你的 Applet 地址！
 
 ---
 
