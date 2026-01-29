@@ -24,8 +24,11 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 echo ""
 echo "📦 正在安装 Server 插件..."
 mkdir -p SillyTavern/plugins/CandyBox
-cp "$SCRIPT_DIR/server/"* SillyTavern/plugins/CandyBox/
-cd SillyTavern/plugins/CandyBox && npm install --silent
+cp -r "$SCRIPT_DIR/server" SillyTavern/plugins/CandyBox/
+cp "$SCRIPT_DIR/server/package.json" SillyTavern/plugins/CandyBox/
+cp "$SCRIPT_DIR/server/index.js" SillyTavern/plugins/CandyBox/
+sed -i "s|require('./server')|require('./server/server')|g" SillyTavern/plugins/CandyBox/index.js
+cd SillyTavern/plugins/CandyBox/server && npm install --silent
 cd - > /dev/null
 echo "✓ Server 插件安装完成"
 
