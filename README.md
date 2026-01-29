@@ -57,6 +57,24 @@ cd SillyTavern
 npm install
 ```
 
+##### 设置快捷指令（可选）
+```bash
+nano ~/.bashrc
+```
+
+在文件末尾添加：
+```bash
+alias qidong='cd ~/SillyTavern && node server.js'
+alias gengxin='cd ~/SillyTavern && git pull && npm install'
+```
+
+保存退出（`Ctrl+X` → `Y` → `Enter`），然后执行：
+```bash
+source ~/.bashrc
+```
+
+以后输入 `qidong` 启动酒馆，`gengxin` 更新酒馆。
+
 #### 第四步：安装 CandyBox
 
 ```bash
