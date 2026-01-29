@@ -150,19 +150,17 @@ curl -sL https://raw.githubusercontent.com/shleeshlee/CandyBox-Proxy/main/instal
 
 关闭酒馆，重新运行 `node server.js`
 
-### 2️⃣ 创建 AI Studio Applet
+### 2️⃣ 打开 CandyBox Applet
 
-1. 打开 [Google AI Studio](https://aistudio.google.com/)
-2. 登录你的 Google 账号
-3. 创建新的 Applet
-4. 上传 `applet/` 文件夹里的文件
-5. 保存并记录 Applet 地址
+点击下方链接打开 Applet：
 
-### 3️⃣ 启动 Applet
+👉 **[点击打开 CandyBox Applet](你的Applet链接)**
 
-1. 打开你创建的 Applet
-2. 点击「启动服务」按钮
-3. 看到「已连接」提示
+> ⚠️ 需要先登录 Google 账号
+
+### 3️⃣ 启动服务
+
+在 Applet 页面点击「**启动服务**」按钮，看到「已连接」提示
 
 ### 4️⃣ 配置酒馆
 
@@ -171,6 +169,34 @@ curl -sL https://raw.githubusercontent.com/shleeshlee/CandyBox-Proxy/main/instal
 3. 在 **Proxy** 下拉框选择「**糖果盒代理**」
 4. 选择模型（如 `gemini-2.0-flash`）
 5. 开始聊天！
+
+---
+
+## 🔧 高级选项：创建自己的 Applet
+
+如果你想使用自己的 Applet（而不是公共链接），可以按以下步骤操作：
+
+### 方法：复制现有 Applet
+
+1. 打开 [CandyBox Applet](你的Applet链接)
+
+2. 点击右上角的 **Copy app** 按钮
+   
+   ![Copy app](docs/copy-app.png)
+
+3. 在你的 AI Studio 中会生成一个副本
+
+4. 点击 **Share** 按钮
+
+5. **打开 Publish your app 开关**（重要！）
+
+6. 复制生成的链接
+   
+   ![Share](docs/share.png)
+
+7. 使用你自己的链接即可
+
+> ⚠️ **注意**：必须开启 **Publish your app** 才能正常使用！
 
 ---
 
@@ -199,7 +225,7 @@ curl -sL https://raw.githubusercontent.com/shleeshlee/CandyBox-Proxy/main/instal
 
 ### Q: 酒馆显示「没有可用的浏览器连接」
 
-**A:** 打开 AI Studio Applet 并点击「启动服务」
+**A:** 打开 CandyBox Applet 并点击「启动服务」
 
 ---
 
@@ -268,7 +294,7 @@ CandyBox-Proxy/
 │   ├── index.js      # 扩展入口
 │   ├── style.css     # 样式
 │   └── manifest.json
-├── applet/           # AI Studio Applet 文件
+├── docs/             # 文档图片
 ├── install.sh        # 一键安装脚本
 └── README.md
 ```
