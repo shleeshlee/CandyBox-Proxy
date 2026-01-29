@@ -77,6 +77,28 @@ source ~/.bashrc
 
 以后输入 `qidong` 启动酒馆，`gengxin` 更新酒馆，`chongqi` 重启酒馆。
 
+##### 安装酒馆助手（可选）
+
+1：通过 SillyTavern 内置安装（推荐）
+
+点击顶部的 扩展 图标（拼图形状）
+点击 「Install Extension」
+粘贴这个 URL：
+```bash
+https://github.com/N0VI028/JS-Slash-Runner
+```
+点击安装，等待完成
+刷新页面
+
+2：手动安装（Termux）
+
+```bash
+cd ~/SillyTavern/data/default-user/extensions
+
+git clone https://github.com/N0VI028/JS-Slash-Runner
+```
+刷新页面
+
 #### 第四步：安装 CandyBox
 
 ```bash
