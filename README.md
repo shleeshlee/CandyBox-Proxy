@@ -67,7 +67,7 @@ nano ~/.bashrc
 ```bash
 alias qidong='cd ~/SillyTavern && node server.js'
 alias gengxin='cd ~/SillyTavern && git pull && npm install'
-alias chongqi='pkill -f "node server.js"; cd ~/SillyTavern && node server.js'
+alias chongqi='pkill -9 node; sleep 1; cd ~/SillyTavern && node server.js'
 ```
 
 保存退出（`Ctrl+X` → `Y` → `Enter`），然后执行：
