@@ -224,23 +224,19 @@ curl -sL https://raw.githubusercontent.com/shleeshlee/CandyBox-Proxy/main/instal
 
 ### 方法：复制现有 Applet
 
-1. 打开 [CandyBox Applet](你的Applet链接)
+1. 点击 右上角 刷新 旁边的 退出全屏（四角向内图标）
 
-2. 点击右上角的 **Copy app** 按钮
-   
-   ![Copy app](docs/copy-app.png)
+2. 点击 右下角的 ... 扩展 点击 **Copy app** 按钮
 
 3. 在你的 AI Studio 中会生成一个副本
 
-4. 点击 **Share** 按钮
+4. 点击 副本 点击 **Share app** 
 
 5. **打开 Publish your app 开关**（重要！）
 
 6. 复制生成的链接
-   
-   ![Share](docs/share.png)
 
-7. 使用你自己的链接即可
+7. 修改SillyTavern/plugins/CandyBox/extension/index.js 的 APPLET_URL '' 内为你的链接
 
 > ⚠️ **注意**：必须开启 **Publish your app** 才能正常使用！
 
@@ -268,44 +264,6 @@ curl -sL https://raw.githubusercontent.com/shleeshlee/CandyBox-Proxy/main/instal
 ---
 
 ## ❓ 常见问题
-
-### Q: 酒馆显示「没有可用的浏览器连接」
-
-**A:** 打开 CandyBox Applet 并点击「启动服务」
-
----
-
-### Q: Applet 显示「未检测到登录」
-
-**A:** 先在浏览器登录 Google 账号，然后刷新 Applet
-
----
-
-### Q: 安装脚本找不到 SillyTavern
-
-**A:** 手动指定路径：
-
-```bash
-ST_DIR=/你的/SillyTavern/路径 bash install.sh
-```
-
----
-
-### Q: Windows 下 curl 命令不可用
-
-**A:** 使用 Git Bash 运行，或者手动下载 ZIP 安装（见上方 Windows 安装说明）
-
----
-
-### Q: 手机上 Termux 安装失败
-
-**A:** 确保已安装 git 和 nodejs：
-
-```bash
-pkg install git nodejs -y
-```
-
----
 
 ### Q: 如何更新到最新版本？
 
