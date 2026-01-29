@@ -184,7 +184,7 @@ curl -sL https://raw.githubusercontent.com/shleeshlee/CandyBox-Proxy/main/instal
 
 ### 3️⃣ 启动服务
 
-在 Applet 页面点击「**连接服务**」按钮
+首次启动点击allow xxx 在 Applet 页面点击「**连接服务**」按钮
 
 ### 4️⃣ 配置酒馆
 
