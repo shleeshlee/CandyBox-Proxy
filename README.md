@@ -171,9 +171,11 @@ curl -sL https://raw.githubusercontent.com/shleeshlee/CandyBox-Proxy/main/instal
 >    bash setup.sh
 >    ```
 > 4. 如果 bash 不可用，手动操作：
->    - 复制 `server` 文件夹内容到 `SillyTavern/plugins/CandyBox/`
+>    - 复制整个 `server` 文件夹到 `SillyTavern/plugins/CandyBox/`
+>    - 再把 `server/package.json` 和 `server/index.js` 复制一份到 `SillyTavern/plugins/CandyBox/` 根目录
+>    - 用文本编辑器打开 `SillyTavern/plugins/CandyBox/index.js`，把 `require('./server')` 改成 `require('./server/server')`
 >    - 复制 `extension` 文件夹内容到 `SillyTavern/public/scripts/extensions/third-party/CandyBox/`
->    - 在 `SillyTavern/plugins/CandyBox/` 运行 `npm install`
+>    - 在 `SillyTavern/plugins/CandyBox/server/` 运行 `npm install`
 
 #### Mac
 
