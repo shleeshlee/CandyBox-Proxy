@@ -1,0 +1,11 @@
+{
+  "display_name": "CottonCandy Proxy",
+  "loading_order": 100,
+  "requires": [],
+  "optional": [],
+  "js": "index.js",
+  "css": "style.css",
+  "author": "shleeshlee & Claude",
+  "version": "1.0.0",
+  "description": "棉花糖代理 - 通过浏览器身份访问 Gemini API"
+}

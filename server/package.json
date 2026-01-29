@@ -1,0 +1,16 @@
+{
+  "name": "cottoncandy-proxy-server",
+  "display_name": "CottonCandy Proxy",
+  "description": "棉花糖代理 - SillyTavern Gemini API 代理服务器",
+  "version": "1.0.0",
+  "author": "shleeshlee & Claude",
+  "license": "MIT",
+  "main": "index.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "ws": "^8.14.2"
+  }
+}
