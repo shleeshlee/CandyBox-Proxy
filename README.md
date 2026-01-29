@@ -58,6 +58,7 @@ npm install
 ```
 
 ##### 设置快捷指令（可选）
+
 ```bash
 nano ~/.bashrc
 ```
@@ -66,6 +67,7 @@ nano ~/.bashrc
 ```bash
 alias qidong='cd ~/SillyTavern && node server.js'
 alias gengxin='cd ~/SillyTavern && git pull && npm install'
+alias chongqi='pkill -f "node server.js"; cd ~/SillyTavern && node server.js'
 ```
 
 保存退出（`Ctrl+X` → `Y` → `Enter`），然后执行：
@@ -73,7 +75,7 @@ alias gengxin='cd ~/SillyTavern && git pull && npm install'
 source ~/.bashrc
 ```
 
-以后输入 `qidong` 启动酒馆，`gengxin` 更新酒馆。
+以后输入 `qidong` 启动酒馆，`gengxin` 更新酒馆，`chongqi` 重启酒馆。
 
 #### 第四步：安装 CandyBox
 
