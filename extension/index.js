@@ -14,7 +14,7 @@ const EXTENSION_NAME = 'CottonCandy';
 // ============================================
 const CONFIG = {
   // TODO: 替换为你在 AI Studio 创建的 Applet 地址
-  APPLET_URL: 'https://ai.studio/apps/drive/1KGeglY6uIKa93T3YCJgNso1gh3ecx-dN?fullscreenApplet=true',
+  APPLET_URL: 'https://ai.studio/apps/drive/1qPTOqe1ub7OaNHgfotbwkHsEPwkfyyqS',
   
   PROXY_URL: 'http://127.0.0.1:8811',
   PROXY_NAME: '棉花糖代理',
