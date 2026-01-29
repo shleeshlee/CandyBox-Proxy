@@ -123,9 +123,15 @@ curl -sL https://raw.githubusercontent.com/shleeshlee/CandyBox-Proxy/main/instal
 
 > 💡 Windows 用户如果 curl 不可用，可以手动下载 ZIP：
 > 1. 下载 [CandyBox-Proxy ZIP](https://github.com/shleeshlee/CandyBox-Proxy/archive/main.zip)
-> 2. 解压到 `SillyTavern/plugins/CandyBox`
-> 3. 复制 `extension` 文件夹到 `SillyTavern/public/scripts/extensions/third-party/CandyBox`
-> 4. 在 `server` 文件夹运行 `npm install`
+> 2. 解压到 SillyTavern 的**父目录**（即和 SillyTavern 文件夹同级）
+> 3. 进入解压后的文件夹，运行：
+>    ```bash
+>    bash setup.sh
+>    ```
+> 4. 如果 bash 不可用，手动操作：
+>    - 复制 `server` 文件夹内容到 `SillyTavern/plugins/CandyBox/`
+>    - 复制 `extension` 文件夹内容到 `SillyTavern/public/scripts/extensions/third-party/CandyBox/`
+>    - 在 `SillyTavern/plugins/CandyBox/` 运行 `npm install`
 
 #### Mac
 
