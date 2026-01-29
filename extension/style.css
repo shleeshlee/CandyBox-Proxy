@@ -1,19 +1,6 @@
-/* CottonCandy Proxy - Extension Style */
+/* 🍬 CandyBox Proxy - Starry Gray Theme */
 
-#cottoncandy_container {
-  margin: 5px 0;
-}
-
-#cc_panel {
-  background: linear-gradient(135deg, rgba(244, 114, 182, 0.1), rgba(168, 85, 247, 0.1));
-  border: 1px solid rgba(244, 114, 182, 0.2);
-}
-
-#cc_panel:hover {
-  background: linear-gradient(135deg, rgba(244, 114, 182, 0.2), rgba(168, 85, 247, 0.2));
-  border-color: rgba(244, 114, 182, 0.4);
-}
-
-#cc_panel:active {
-  transform: scale(0.98);
+#candybox_container {
+  margin: 0;
+  padding: 0;
 }

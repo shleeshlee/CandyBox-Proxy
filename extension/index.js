@@ -1,23 +1,28 @@
 /**
- * CottonCandy Proxy - SillyTavern Extension
- * 棉花糖代理 - 酒馆扩展
+ * 🍬 CandyBox Proxy - SillyTavern Extension
+ * 糖果盒代理 - 酒馆扩展
  * 
- * 功能：显示状态 + 打开 Applet 按钮
+ * 功能：状态显示 + 一键打开 Applet
+ * 作者：shleeshlee
+ * 仓库：https://github.com/shleeshlee/CandyBox-Proxy
  */
 
 import { extension_settings, getContext } from '../../../extensions.js';
 
-const EXTENSION_NAME = 'CottonCandy';
+const EXTENSION_NAME = 'CandyBox';
 
 // ============================================
-// 配置 - 根据你的 Applet 地址修改
+// 配置
 // ============================================
 const CONFIG = {
-  // TODO: 替换为你在 AI Studio 创建的 Applet 地址
-  APPLET_URL: 'https://ai.studio/apps/drive/1qPTOqe1ub7OaNHgfotbwkHsEPwkfyyqS',
+  // Applet 地址 - 替换为你自己的
+  APPLET_URL: 'https://aistudio.google.com/',
   
+  // 代理设置
   PROXY_URL: 'http://127.0.0.1:8811',
-  PROXY_NAME: '棉花糖代理',
+  PROXY_NAME: '糖果盒代理',
+  
+  // 状态检查间隔 (毫秒)
   CHECK_INTERVAL: 5000,
 };
 
@@ -56,23 +61,26 @@ async function checkStatus() {
 // UI 更新
 // ============================================
 function updateUI() {
-  const dot = document.getElementById('cc_status_dot');
-  const text = document.getElementById('cc_status_text');
+  const dot = document.getElementById('cb_status_dot');
+  const text = document.getElementById('cb_status_text');
   
   if (!dot || !text) return;
 
   if (state.serverOk && state.browserOk) {
-    dot.style.background = '#22c55e'; // 绿色
+    dot.style.background = '#22c55e';
+    dot.style.boxShadow = '0 0 6px #22c55e';
     text.textContent = '就绪';
-    text.style.color = '#22c55e';
+    text.style.color = '#86efac';
   } else if (state.serverOk) {
-    dot.style.background = '#f59e0b'; // 黄色
+    dot.style.background = '#f59e0b';
+    dot.style.boxShadow = '0 0 6px #f59e0b';
     text.textContent = '等待Applet';
-    text.style.color = '#f59e0b';
+    text.style.color = '#fcd34d';
   } else {
-    dot.style.background = '#ef4444'; // 红色
+    dot.style.background = '#ef4444';
+    dot.style.boxShadow = '0 0 6px #ef4444';
     text.textContent = '离线';
-    text.style.color = '#ef4444';
+    text.style.color = '#fca5a5';
   }
 }
 
@@ -86,12 +94,14 @@ function openApplet() {
   }
 
   const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-  const url = `${CONFIG.APPLET_URL}?fullscreenApplet=true`;
+  const url = CONFIG.APPLET_URL.includes('?') 
+    ? `${CONFIG.APPLET_URL}&fullscreenApplet=true`
+    : `${CONFIG.APPLET_URL}?fullscreenApplet=true`;
   
   if (isMobile) {
     state.appletWindow = window.open(url, '_blank');
   } else {
-    state.appletWindow = window.open(url, 'cottoncandy-applet', 'width=500,height=700');
+    state.appletWindow = window.open(url, 'candybox-applet', 'width=500,height=700');
   }
   
   setTimeout(checkStatus, 3000);
@@ -120,47 +130,62 @@ function registerProxy() {
           select.appendChild(option);
         }
 
-        console.log(`[${EXTENSION_NAME}] 代理已注册: ${CONFIG.PROXY_NAME}`);
+        console.log(`[${EXTENSION_NAME}] 🍬 代理已注册: ${CONFIG.PROXY_NAME}`);
       }
     }).catch(() => {});
   } catch {}
 }
 
 // ============================================
-// 创建 UI
+// 创建 UI - 星空灰主题
 // ============================================
 function createUI() {
   const html = `
-    <div id="cottoncandy_container" class="extension_container">
-      <div id="cc_panel" style="
+    <div id="candybox_container" class="extension_container">
+      <div id="cb_panel" style="
         cursor: pointer;
-        padding: 12px 16px;
+        padding: 6px 10px;
         display: flex;
         justify-content: space-between;
         align-items: center;
         border-radius: 8px;
+        background: linear-gradient(135deg, #374151 0%, #4b5563 50%, #6b7280 100%);
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
         transition: all 0.2s ease;
+        margin: 2px 0;
+        color: #f3f4f6;
       ">
-        <div style="display: flex; align-items: center; gap: 10px;">
-          <span id="cc_status_dot" style="
-            width: 10px;
-            height: 10px;
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <span style="font-size: 10px; opacity: 0.9;">✦ ✧</span>
+          <b style="font-size: 12px; font-weight: 500;">糖果盒代理</b>
+          <span id="cb_status_dot" style="
+            width: 6px;
+            height: 6px;
             border-radius: 50%;
             background: #ef4444;
+            box-shadow: 0 0 6px #ef4444;
             flex-shrink: 0;
           "></span>
-          <b style="font-size: 14px;">🍬 棉花糖代理</b>
-          <span id="cc_status_text" style="font-size: 12px; color: #ef4444;">离线</span>
+          <span id="cb_status_text" style="font-size: 10px; color: #fca5a5;">离线</span>
         </div>
-        <div class="fa-solid fa-external-link-alt" style="opacity: 0.5; font-size: 12px;"></div>
+        <div class="fa-solid fa-chevron-right" style="opacity: 0.7; font-size: 12px;"></div>
       </div>
     </div>
   `;
 
   $('#extensions_settings2').append(html);
 
+  // 悬停效果
+  $('#cb_panel').on('mouseenter', function() {
+    $(this).css('background', 'linear-gradient(135deg, #4b5563 0%, #6b7280 50%, #9ca3af 100%)');
+    $(this).css('box-shadow', '0 3px 10px rgba(0, 0, 0, 0.3)');
+  }).on('mouseleave', function() {
+    $(this).css('background', 'linear-gradient(135deg, #374151 0%, #4b5563 50%, #6b7280 100%)');
+    $(this).css('box-shadow', '0 2px 6px rgba(0, 0, 0, 0.2)');
+  });
+
   // 点击打开 Applet
-  $(document).on('click', '#cc_panel', (e) => {
+  $(document).on('click', '#cb_panel', (e) => {
     e.preventDefault();
     e.stopPropagation();
     openApplet();
@@ -172,7 +197,7 @@ function createUI() {
 // ============================================
 jQuery(async () => {
   try {
-    console.log(`[${EXTENSION_NAME}] 正在加载...`);
+    console.log(`[${EXTENSION_NAME}] 🍬 正在加载...`);
     
     createUI();
     registerProxy();
@@ -180,9 +205,9 @@ jQuery(async () => {
     await checkStatus();
     state.checkTimer = setInterval(checkStatus, CONFIG.CHECK_INTERVAL);
     
-    console.log(`[${EXTENSION_NAME}] 加载完成`);
+    console.log(`[${EXTENSION_NAME}] ✅ 加载完成`);
   } catch (error) {
-    console.error(`[${EXTENSION_NAME}] 加载失败:`, error);
+    console.error(`[${EXTENSION_NAME}] ❌ 加载失败:`, error);
   }
 });
 

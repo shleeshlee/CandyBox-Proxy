@@ -1,11 +1,13 @@
 {
-  "display_name": "CottonCandy Proxy",
-  "loading_order": 100,
+  "display_name": "CandyBox Proxy",
+  "loading_order": 1,
   "requires": [],
   "optional": [],
+  "dependencies": [],
   "js": "index.js",
   "css": "style.css",
-  "author": "shleeshlee & Claude",
+  "author": "shleeshlee",
   "version": "1.0.0",
-  "description": "棉花糖代理 - 通过浏览器身份访问 Gemini API"
+  "auto_update": true,
+  "minimum_client_version": "1.0.0"
 }

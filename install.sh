@@ -1,27 +1,38 @@
 #!/bin/bash
 
 # ============================================
-# 🍬 CottonCandy Proxy 一键安装脚本
+# 🍬 CandyBox Proxy 一键安装脚本
+# 作者: shleeshlee
+# 仓库: https://github.com/shleeshlee/CandyBox-Proxy
 # ============================================
 
 echo ""
 echo "🍬 ════════════════════════════════════════"
-echo "🍬  CottonCandy Proxy 一键安装"
+echo "🍬  CandyBox Proxy 一键安装"
+echo "🍬  糖果盒代理 - 让酒馆连接 Gemini"
 echo "🍬 ════════════════════════════════════════"
 echo ""
 
-# 颜色
+# 颜色定义
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
-NC='\033[0m' # No Color
+CYAN='\033[0;36m'
+NC='\033[0m'
 
+log_info() { echo -e "${CYAN}[INFO]${NC} $1"; }
+log_success() { echo -e "${GREEN}[SUCCESS]${NC} $1"; }
+log_warn() { echo -e "${YELLOW}[WARN]${NC} $1"; }
+log_error() { echo -e "${RED}[ERROR]${NC} $1"; }
+
+# ============================================
 # 1. 查找 SillyTavern 目录
-echo "📍 正在查找 SillyTavern..."
+# ============================================
+log_info "正在查找 SillyTavern..."
 
 ST_DIR=""
 
-# 常见位置
+# 常见位置（包括 Termux）
 POSSIBLE_PATHS=(
     "$HOME/SillyTavern"
     "$HOME/sillytavern"
@@ -29,10 +40,12 @@ POSSIBLE_PATHS=(
     "$HOME/ST"
     "/data/data/com.termux/files/home/SillyTavern"
     "/data/data/com.termux/files/home/sillytavern"
+    "$(pwd)"
+    "$(pwd)/.."
 )
 
 for path in "${POSSIBLE_PATHS[@]}"; do
-    if [ -d "$path" ] && [ -f "$path/server.js" ]; then
+    if [ -d "$path" ] && [ -f "$path/server.js" ] && [ -d "$path/public" ]; then
         ST_DIR="$path"
         break
     fi
@@ -40,7 +53,8 @@ done
 
 # 如果没找到，用 find 搜索
 if [ -z "$ST_DIR" ]; then
-    FOUND=$(find ~ -maxdepth 4 -name "server.js" -path "*/SillyTavern/*" 2>/dev/null | head -1)
+    log_info "常见位置未找到，正在搜索..."
+    FOUND=$(find ~ -maxdepth 4 -name "server.js" -path "*SillyTavern*" 2>/dev/null | head -1)
     if [ -n "$FOUND" ]; then
         ST_DIR=$(dirname "$FOUND")
     fi
@@ -48,78 +62,122 @@ fi
 
 # 还是没找到
 if [ -z "$ST_DIR" ]; then
-    echo -e "${RED}❌ 找不到 SillyTavern 目录！${NC}"
+    log_error "找不到 SillyTavern 目录！"
     echo ""
-    echo "请手动指定路径，运行："
+    echo "请手动指定路径运行："
     echo "  ST_DIR=/你的/SillyTavern/路径 bash install.sh"
     echo ""
     exit 1
 fi
 
-echo -e "${GREEN}✓ 找到 SillyTavern: $ST_DIR${NC}"
+log_success "找到 SillyTavern: $ST_DIR"
 
-# 2. 创建 plugins 目录（如果不存在）
+# ============================================
+# 2. 创建目录
+# ============================================
 PLUGINS_DIR="$ST_DIR/plugins"
-if [ ! -d "$PLUGINS_DIR" ]; then
-    echo "📁 创建 plugins 目录..."
-    mkdir -p "$PLUGINS_DIR"
-fi
+EXT_DIR="$ST_DIR/public/scripts/extensions/third-party"
 
+mkdir -p "$PLUGINS_DIR"
+mkdir -p "$EXT_DIR"
+
+# ============================================
 # 3. 检查是否已安装
-INSTALL_DIR="$PLUGINS_DIR/CottonCandy"
-if [ -d "$INSTALL_DIR" ]; then
-    echo -e "${YELLOW}⚠️  检测到已安装，正在更新...${NC}"
-    rm -rf "$INSTALL_DIR"
+# ============================================
+PLUGIN_INSTALL_DIR="$PLUGINS_DIR/CandyBox"
+EXT_INSTALL_DIR="$EXT_DIR/CandyBox"
+
+if [ -d "$PLUGIN_INSTALL_DIR" ] || [ -d "$EXT_INSTALL_DIR" ]; then
+    log_warn "检测到已安装，正在更新..."
+    rm -rf "$PLUGIN_INSTALL_DIR"
+    rm -rf "$EXT_INSTALL_DIR"
 fi
 
+# ============================================
 # 4. 克隆仓库
-echo "📥 正在下载 CottonCandy Proxy..."
+# ============================================
+log_info "正在下载 CandyBox Proxy..."
+
 cd "$PLUGINS_DIR"
 
-if ! git clone --depth 1 https://github.com/shleeshlee/CottonCandy-Proxy.git CottonCandy 2>/dev/null; then
-    echo -e "${RED}❌ 下载失败！请检查网络连接。${NC}"
+if ! git clone --depth 1 https://github.com/shleeshlee/CandyBox-Proxy.git CandyBox 2>/dev/null; then
+    log_error "下载失败！请检查网络连接。"
+    echo ""
+    echo "如果无法访问 GitHub，可以尝试："
+    echo "1. 使用代理"
+    echo "2. 手动下载 ZIP 并解压到 $PLUGINS_DIR/CandyBox"
+    echo ""
     exit 1
 fi
 
-echo -e "${GREEN}✓ 下载完成${NC}"
+log_success "下载完成"
 
+# ============================================
 # 5. 安装依赖
-echo "📦 正在安装依赖..."
-cd "$INSTALL_DIR/server"
+# ============================================
+log_info "正在安装依赖..."
 
-if ! npm install --silent 2>/dev/null; then
-    echo -e "${YELLOW}⚠️  npm install 有警告，但可能不影响使用${NC}"
+cd "$PLUGIN_INSTALL_DIR/server"
+
+if command -v npm &> /dev/null; then
+    npm install --silent 2>/dev/null || log_warn "npm install 有警告，但可能不影响使用"
+    log_success "依赖安装完成"
+else
+    log_warn "未检测到 npm，跳过依赖安装"
+    log_warn "请手动运行: cd $PLUGIN_INSTALL_DIR/server && npm install"
 fi
 
-echo -e "${GREEN}✓ 依赖安装完成${NC}"
+# ============================================
+# 6. 安装扩展
+# ============================================
+log_info "正在安装扩展..."
 
-# 6. 安装扩展（可选）
-EXT_DIR="$ST_DIR/public/scripts/extensions/third-party/CottonCandy"
-echo "📁 正在安装扩展..."
+mkdir -p "$EXT_INSTALL_DIR"
+cp -r "$PLUGIN_INSTALL_DIR/extension/"* "$EXT_INSTALL_DIR/"
 
-if [ -d "$EXT_DIR" ]; then
-    rm -rf "$EXT_DIR"
+log_success "扩展安装完成"
+
+# ============================================
+# 7. 启用 Server Plugins
+# ============================================
+CONFIG_FILE="$ST_DIR/config.yaml"
+
+if [ -f "$CONFIG_FILE" ]; then
+    if grep -q "enableServerPlugins: false" "$CONFIG_FILE"; then
+        log_info "正在启用 Server Plugins..."
+        if [[ "$OSTYPE" == "darwin"* ]]; then
+            sed -i '' 's/enableServerPlugins: false/enableServerPlugins: true/g' "$CONFIG_FILE"
+        else
+            sed -i 's/enableServerPlugins: false/enableServerPlugins: true/g' "$CONFIG_FILE"
+        fi
+        log_success "Server Plugins 已启用"
+    else
+        log_success "Server Plugins 已经是启用状态"
+    fi
 fi
 
-mkdir -p "$EXT_DIR"
-cp -r "$INSTALL_DIR/extension/"* "$EXT_DIR/"
-
-echo -e "${GREEN}✓ 扩展安装完成${NC}"
-
-# 7. 完成
+# ============================================
+# 8. 完成
+# ============================================
 echo ""
 echo "🍬 ════════════════════════════════════════"
 echo -e "🍬  ${GREEN}安装成功！${NC}"
 echo "🍬 ════════════════════════════════════════"
 echo ""
-echo "📍 Server 安装位置: $INSTALL_DIR/server"
-echo "📍 扩展安装位置: $EXT_DIR"
+echo "📍 插件位置: $PLUGIN_INSTALL_DIR"
+echo "📍 扩展位置: $EXT_INSTALL_DIR"
 echo ""
-echo "🎮 下一步："
-echo "   1. 重启 SillyTavern"
-echo "   2. 在 AI Studio 创建 Applet（上传 applet/ 文件夹）"
-echo "   3. 打开 Applet → 点击「启动服务」"
-echo "   4. 在酒馆选择代理 → 棉花糖代理"
+echo "🎮 下一步操作："
 echo ""
-echo "📂 Applet 文件位置: $INSTALL_DIR/applet/"
+echo "   1️⃣  重启 SillyTavern"
+echo ""
+echo "   2️⃣  在 AI Studio 创建 Applet"
+echo "       上传 applet/ 文件夹里的文件"
+echo ""
+echo "   3️⃣  打开 Applet → 点击「启动服务」"
+echo ""
+echo "   4️⃣  在酒馆设置代理"
+echo "       API → OpenAI → Proxy → 选「糖果盒代理」"
+echo ""
+echo "🍬 ════════════════════════════════════════"
 echo ""

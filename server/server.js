@@ -1,9 +1,10 @@
 /**
- * CottonCandy Proxy - Server
- * 棉花糖代理 - 中转服务器
+ * 🍬 CandyBox Proxy - Server
+ * 糖果盒代理 - 中转服务器
  * 
- * 作者: shleeshlee & Claude
+ * 作者: shleeshlee
  * 端口: HTTP 8811 / WebSocket 9111
+ * 仓库: https://github.com/shleeshlee/CandyBox-Proxy
  */
 
 const express = require('express');
@@ -106,7 +107,7 @@ class ConnectionManager extends EventEmitter {
 
   remove(ws) {
     this.connections.delete(ws);
-    log.info('浏览器已断开');
+    log.info('🍬 浏览器已断开');
     
     this.queues.forEach(q => q.close());
     this.queues.clear();
@@ -202,10 +203,11 @@ class ProxyServer extends EventEmitter {
       
       console.log('');
       console.log('🍬 ═══════════════════════════════════════════');
-      console.log('🍬  CottonCandy Proxy - 棉花糖代理已启动！');
+      console.log('🍬  CandyBox Proxy - 糖果盒代理已启动！');
       console.log('🍬 ═══════════════════════════════════════════');
       console.log(`🍬  HTTP:      http://${this.config.HOST}:${this.config.HTTP_PORT}`);
       console.log(`🍬  WebSocket: ws://${this.config.HOST}:${this.config.WS_PORT}`);
+      console.log(`🍬  状态检查:  http://127.0.0.1:${this.config.HTTP_PORT}/status`);
       console.log('🍬 ═══════════════════════════════════════════');
       console.log('');
       
@@ -227,7 +229,7 @@ class ProxyServer extends EventEmitter {
     // 状态端点
     app.get('/status', (req, res) => {
       res.json({
-        name: 'CottonCandy Proxy',
+        name: 'CandyBox Proxy',
         status: 'running',
         browser_connected: this.connections.isConnected,
         timestamp: new Date().toISOString(),
@@ -270,7 +272,7 @@ class ProxyServer extends EventEmitter {
       log.warn(`[${requestId.slice(-6)}] 无浏览器连接`);
       return res.status(503).json({ 
         error: '没有可用的浏览器连接',
-        hint: '请打开 AI Studio 中的 CottonCandy Applet 并点击「启动服务」',
+        hint: '请打开 AI Studio 中的 CandyBox Applet 并点击「启动服务」',
       });
     }
 
