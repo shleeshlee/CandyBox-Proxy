@@ -66,7 +66,7 @@ cd CottonCandy/server && npm install
 
 ```bash
 # 进入 SillyTavern 扩展目录
-cd SillyTavern/public/scripts/extensions/third-party
+cd ~/SillyTavern/public/scripts/extensions/third-party
 
 # 创建软链接（推荐）
 ln -s ../../../plugins/CottonCandy/extension CottonCandy
