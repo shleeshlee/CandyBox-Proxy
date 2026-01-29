@@ -1,6 +1,6 @@
 # 🍬 CandyBox Proxy
 
-**糖果盒代理** - 通过浏览器身份免费使用 Gemini API
+**CandyBox Proxy** - 通过浏览器身份免费使用 Gemini API
 
 > 让你的 SillyTavern 酒馆连接 Google AI Studio，无需 API Key
 
@@ -172,7 +172,7 @@ curl -sL https://raw.githubusercontent.com/shleeshlee/CandyBox-Proxy/main/instal
 
 1. 打开酒馆设置
 2. 进入 **API** → **Chat Completion** → **OpenAI**
-3. 在 **Proxy** 下拉框选择「**糖果盒代理**」
+3. 在 **Proxy** 下拉框选择「**CandyBox**」
 4. 选择模型（如 `gemini-2.0-flash`）
 5. 开始聊天！
 
@@ -328,4 +328,4 @@ MIT License
 
 ---
 
-> 🍬 糖果盒代理 - 甜蜜连接你的 AI 世界
+> 🍬 CandyBox Proxy - Sweet connection to your AI world

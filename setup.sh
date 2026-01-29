@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # CandyBox Proxy - 快速安装脚本
-# 糖果盒代理安装助手
+# CandyBox Proxy - Quick Install Script
 
 echo "🍬 ════════════════════════════════════════"
 echo "🍬  CandyBox Proxy 安装助手"
@@ -48,5 +48,5 @@ echo "   3. 点击「启动服务」"
 echo ""
 echo "🎮 使用方法："
 echo "   1. 打开 Applet → 点击「启动服务」"
-echo "   2. 在酒馆选择代理 → 糖果盒代理"
+echo "   2. 在酒馆选择代理 → CandyBox"
 echo ""

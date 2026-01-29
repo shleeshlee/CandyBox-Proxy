@@ -1,6 +1,6 @@
 /**
  * 🍬 CandyBox Proxy - Server
- * 糖果盒代理 - 中转服务器
+ * CandyBox Proxy - Relay Server
  * 
  * 作者: shleeshlee
  * 端口: HTTP 8811 / WebSocket 9111
@@ -203,7 +203,7 @@ class ProxyServer extends EventEmitter {
       
       console.log('');
       console.log('🍬 ═══════════════════════════════════════════');
-      console.log('🍬  CandyBox Proxy - 糖果盒代理已启动！');
+      console.log('🍬  CandyBox Proxy Started!');
       console.log('🍬 ═══════════════════════════════════════════');
       console.log(`🍬  HTTP:      http://${this.config.HOST}:${this.config.HTTP_PORT}`);
       console.log(`🍬  WebSocket: ws://${this.config.HOST}:${this.config.WS_PORT}`);

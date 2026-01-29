@@ -1,7 +1,7 @@
 {
   "name": "candybox-proxy",
   "version": "1.0.0",
-  "description": "糖果盒代理 - 通过浏览器身份访问 Gemini API",
+  "description": "CandyBox Proxy - Access Gemini API via browser",
   "main": "index.js",
   "scripts": {
     "start": "node server.js",

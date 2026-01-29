@@ -1,6 +1,6 @@
 /**
  * 🍬 CandyBox Proxy - SillyTavern Extension
- * 糖果盒代理 - 酒馆扩展
+ * 🍬 CandyBox Proxy - SillyTavern Extension
  * 
  * 功能：状态显示 + 一键打开 Applet
  * 作者：shleeshlee
@@ -20,7 +20,7 @@ const CONFIG = {
   
   // 代理设置
   PROXY_URL: 'http://127.0.0.1:8811',
-  PROXY_NAME: '糖果盒代理',
+  PROXY_NAME: 'CandyBox',
   
   // 状态检查间隔 (毫秒)
   CHECK_INTERVAL: 5000,
@@ -157,7 +157,7 @@ function createUI() {
       ">
         <div style="display: flex; align-items: center; gap: 6px;">
           <span style="font-size: 10px; opacity: 0.9;">✦ ✧</span>
-          <b style="font-size: 12px; font-weight: 500;">糖果盒代理</b>
+          <b style="font-size: 12px; font-weight: 500;">CandyBox</b>
           <span id="cb_status_dot" style="
             width: 6px;
             height: 6px;

@@ -1,6 +1,6 @@
 /**
  * 🍬 CandyBox Proxy - SillyTavern Plugin Entry
- * 糖果盒代理 - 酒馆插件入口
+ * CandyBox Proxy - SillyTavern Plugin Entry
  * 
  * 作者: shleeshlee
  * 仓库: https://github.com/shleeshlee/CandyBox-Proxy
@@ -96,6 +96,6 @@ module.exports = {
   info: {
     id: 'candybox-proxy',
     name: 'CandyBox Proxy',
-    description: '糖果盒代理 - 通过浏览器身份访问 Gemini API',
+    description: 'CandyBox Proxy - Access Gemini API via browser',
   },
 };
