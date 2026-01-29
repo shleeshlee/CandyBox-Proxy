@@ -238,7 +238,7 @@ curl -sL https://raw.githubusercontent.com/shleeshlee/CandyBox-Proxy/main/instal
 
 6. 复制生成的链接
 
-7. 修改SillyTavern/plugins/CandyBox/extension/index.js 的 APPLET_URL '' 内为你的链接
+7. 使 [MT管理器](https://mt2.cn/download/) 修改SillyTavern/plugins/CandyBox/extension/index.js 的 APPLET_URL '' 内为你的链接
    ```bash
    nano ~/SillyTavern/plugins/CandyBox/extension/index.js
    ```
@@ -288,6 +288,18 @@ curl -sL https://raw.githubusercontent.com/shleeshlee/CandyBox-Proxy/main/instal
 rm -rf ~/SillyTavern/plugins/CandyBox
 rm -rf ~/SillyTavern/public/scripts/extensions/third-party/CandyBox
 ```
+
+---
+
+#### 💡 如何用 MT 管理器查看/编辑酒馆文件？
+
+1. 打开 MT 管理器，点击**左上角三条横线图标**
+2. 点击**右上角三个竖点图标**
+3. 点击「**添加本地存储**」
+4. 在打开的页面中，点击**使用此文件夹**
+5. 选择「**允许**」
+6. 点击「**Termux Home**」
+7. /storage/BA73-022B/Silly Tavern 点击**右上角三个竖点图标** 设为主页
 
 ---
 
