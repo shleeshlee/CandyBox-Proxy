@@ -239,6 +239,9 @@ curl -sL https://raw.githubusercontent.com/shleeshlee/CandyBox-Proxy/main/instal
 6. 复制生成的链接
 
 7. 修改SillyTavern/plugins/CandyBox/extension/index.js 的 APPLET_URL '' 内为你的链接
+   ```bash
+   nano ~/SillyTavern/plugins/CandyBox/extension/index.js
+   ```
 
 > ⚠️ **注意**：必须开启 **Publish your app** 才能正常使用！
 
