@@ -8,8 +8,7 @@
 
 echo ""
 echo "🍬 ════════════════════════════════════════"
-echo "🍬  CandyBox Proxy 一键安装"
-echo "🍬  CandyBox Proxy - Connect SillyTavern to Gemini"
+echo "🍬  CandyBox Proxy 安装助手"
 echo "🍬 ════════════════════════════════════════"
 echo ""
 
@@ -26,13 +25,77 @@ log_warn() { echo -e "${YELLOW}[WARN]${NC} $1"; }
 log_error() { echo -e "${RED}[ERROR]${NC} $1"; }
 
 # ============================================
+# 0. 显示菜单
+# ============================================
+echo "请选择操作："
+echo ""
+echo "  1) 安装 / 重装"
+echo "  2) 一键卸载"
+echo ""
+read -p "请输入选项 [1/2]: " choice
+
+case $choice in
+    1)
+        log_info "开始安装..."
+        ;;
+    2)
+        log_info "开始卸载..."
+        
+        # 查找 SillyTavern 目录
+        ST_DIR=""
+        POSSIBLE_PATHS=(
+            "$HOME/SillyTavern"
+            "$HOME/sillytavern"
+            "$HOME/st"
+            "$HOME/ST"
+            "/data/data/com.termux/files/home/SillyTavern"
+            "/data/data/com.termux/files/home/sillytavern"
+            "$(pwd)"
+            "$(pwd)/.."
+        )
+        
+        for path in "${POSSIBLE_PATHS[@]}"; do
+            if [ -d "$path" ] && [ -f "$path/server.js" ] && [ -d "$path/public" ]; then
+                ST_DIR="$path"
+                break
+            fi
+        done
+        
+        if [ -z "$ST_DIR" ]; then
+            FOUND=$(find ~ -maxdepth 4 -name "server.js" -path "*SillyTavern*" 2>/dev/null | head -1)
+            if [ -n "$FOUND" ]; then
+                ST_DIR=$(dirname "$FOUND")
+            fi
+        fi
+        
+        if [ -z "$ST_DIR" ]; then
+            log_error "找不到 SillyTavern 目录！"
+            exit 1
+        fi
+        
+        rm -rf "$ST_DIR/plugins/CandyBox"
+        rm -rf "$ST_DIR/public/scripts/extensions/third-party/CandyBox"
+        
+        echo ""
+        echo "🍬 ════════════════════════════════════════"
+        echo -e "🍬  ${GREEN}卸载完成！${NC}"
+        echo "🍬 ════════════════════════════════════════"
+        echo ""
+        exit 0
+        ;;
+    *)
+        log_error "无效选项，退出"
+        exit 1
+        ;;
+esac
+
+# ============================================
 # 1. 查找 SillyTavern 目录
 # ============================================
 log_info "正在查找 SillyTavern..."
 
 ST_DIR=""
 
-# 常见位置（包括 Termux）
 POSSIBLE_PATHS=(
     "$HOME/SillyTavern"
     "$HOME/sillytavern"
@@ -51,7 +114,6 @@ for path in "${POSSIBLE_PATHS[@]}"; do
     fi
 done
 
-# 如果没找到，用 find 搜索
 if [ -z "$ST_DIR" ]; then
     log_info "常见位置未找到，正在搜索..."
     FOUND=$(find ~ -maxdepth 4 -name "server.js" -path "*SillyTavern*" 2>/dev/null | head -1)
@@ -60,7 +122,6 @@ if [ -z "$ST_DIR" ]; then
     fi
 fi
 
-# 还是没找到
 if [ -z "$ST_DIR" ]; then
     log_error "找不到 SillyTavern 目录！"
     echo ""
