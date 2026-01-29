@@ -158,9 +158,7 @@ curl -sL https://raw.githubusercontent.com/shleeshlee/CandyBox-Proxy/main/instal
 
 ### 2️⃣ 打开 CandyBox Applet
 
-点击下方链接打开 Applet：
-
-👉 **[点击打开 CandyBox Applet](你的Applet链接)**
+在酒馆扩展面板点击「✦ ✧ 糖果盒代理」按钮，会自动打开 Applet
 
 > ⚠️ 需要先登录 Google 账号
 
