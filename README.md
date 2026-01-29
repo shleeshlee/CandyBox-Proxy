@@ -174,7 +174,7 @@ curl -sL https://raw.githubusercontent.com/shleeshlee/CandyBox-Proxy/main/instal
 
 ### 1️⃣ 重启 SillyTavern
 
-关闭酒馆，重新运行 `node server.js`
+运行`pkill -9 node`，重新运行 `node server.js`
 
 ### 2️⃣ 打开 CandyBox Applet
 
@@ -184,13 +184,13 @@ curl -sL https://raw.githubusercontent.com/shleeshlee/CandyBox-Proxy/main/instal
 
 ### 3️⃣ 启动服务
 
-在 Applet 页面点击「**启动服务**」按钮，看到「已连接」提示
+在 Applet 页面点击「**连接服务**」按钮
 
 ### 4️⃣ 配置酒馆
 
 1. 打开酒馆设置
-2. 进入 **API** → **Chat Completion** → **OpenAI**
-3. 在 **Proxy** 下拉框选择「**CandyBox**」
+2. 进入 **API连接配置** → API **聊天补全** → 聊天补全来源 **Google AI Studio** 
+3. 在 **反向代理** 下拉框选择「**CandyBox**」
 4. 选择模型（如 `gemini-2.0-flash`）
 5. 开始聊天！
 
