@@ -308,6 +308,11 @@ rm -rf ~/SillyTavern/public/scripts/extensions/third-party/CandyBox
 
 ---
 
+### Q: 如何解决400报错？
+Google AI Studio API returned error: 400 Bad Request 
+
+**A:** 预设界面 **推理强度** 选择 **自动**
+
 ## 📁 项目结构
 
 ```
