@@ -219,23 +219,21 @@ curl -sL https://raw.githubusercontent.com/shleeshlee/CandyBox-Proxy/main/instal
 
 如果你想使用自己的 Applet（而不是公共链接），可以按以下步骤操作：
 
-### 方法：复制现有 Applet
+### 方法：复制现有 Applet   [直达](https://ai.studio/apps/drive/1Q4aqGJNnOzPWh0r1ZpZASoNdojqUkWTk?fullscreenApplet=true)
 
 1. 点击 右上角 刷新 旁边的 退出全屏（四角向内图标）
 
 2. 点击 右下角的 ... 扩展 点击 **Copy app** 按钮
 
-3. [直达](https://ai.studio/apps/drive/1Q4aqGJNnOzPWh0r1ZpZASoNdojqUkWTk?fullscreenApplet=true)
+3. 在你的 AI Studio 中会生成一个副本
 
-4. 在你的 AI Studio 中会生成一个副本
+4. 点击 副本 点击 **Share app** 
 
-5. 点击 副本 点击 **Share app** 
+5. **打开 Publish your app 开关**（重要！）
 
-6. **打开 Publish your app 开关**（重要！）
+6. 复制生成的链接
 
-7. 复制生成的链接
-
-8. 使 [MT管理器](https://mt2.cn/download/) 修改SillyTavern/plugins/CandyBox/extension/index.js 的 APPLET_URL '' 内为你的链接
+7. 使用 [MT管理器](https://mt2.cn/download/) 修改SillyTavern/plugins/CandyBox/extension/index.js 的 APPLET_URL '' 内为你的链接
    ```bash
    nano ~/SillyTavern/plugins/CandyBox/extension/index.js
    ```
