@@ -285,6 +285,11 @@ curl -sL https://raw.githubusercontent.com/shleeshlee/CandyBox-Proxy/main/instal
 **A:** 删除以下文件夹：
 
 ```bash
+# 先停酒馆
+pkill -9 node
+```
+
+```bash
 rm -rf ~/SillyTavern/plugins/CandyBox
 rm -rf ~/SillyTavern/public/scripts/extensions/third-party/CandyBox
 ```
