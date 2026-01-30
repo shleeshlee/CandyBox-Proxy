@@ -225,7 +225,7 @@ curl -sL https://raw.githubusercontent.com/shleeshlee/CandyBox-Proxy/main/instal
 
 2. 点击 右下角的 ... 扩展 点击 **Copy app** 按钮
 
-3. [直达]（https://ai.studio/apps/drive/1Q4aqGJNnOzPWh0r1ZpZASoNdojqUkWTk）
+3. [直达](https://ai.studio/apps/drive/1Q4aqGJNnOzPWh0r1ZpZASoNdojqUkWTk?fullscreenApplet=true)
 
 4. 在你的 AI Studio 中会生成一个副本
 
