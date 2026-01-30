@@ -6,15 +6,6 @@
 
 ---
 
-## ✨ 特性
-
-- 🔌 **即插即用** - 一键安装，自动配置
-- 📱 **全平台支持** - 手机 / 云端 / PC 都能用
-- 🎯 **状态指示** - 实时显示连接状态（🟢就绪 🟡等待 🔴离线）
-- 🚀 **自动注册** - 代理地址自动添加到酒馆，无需手动输入
-
----
-
 ## 📦 一键安装
 
 复制下面的命令，粘贴到终端运行：
@@ -256,18 +247,6 @@ curl -sL https://raw.githubusercontent.com/shleeshlee/CandyBox-Proxy/main/instal
 
 ---
 
-## 🚦 状态说明
-
-酒馆扩展面板会显示连接状态：
-
-| 状态 | 颜色 | 说明 |
-|------|------|------|
-| 🟢 就绪 | 绿色 | 一切正常，可以使用 |
-| 🟡 等待Applet | 黄色 | 服务器已启动，请打开 Applet |
-| 🔴 离线 | 红色 | 服务器未启动，请重启酒馆 |
-
----
-
 ## ❓ 常见问题
 
 ### Q: 如何更新到最新版本？
@@ -312,6 +291,8 @@ rm -rf ~/SillyTavern/public/scripts/extensions/third-party/CandyBox
 Google AI Studio API returned error: 400 Bad Request 
 
 **A:** 预设界面 **推理强度** 选择 **自动**
+
+---
 
 ## 📁 项目结构
 
