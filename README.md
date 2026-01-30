@@ -265,7 +265,13 @@ curl -sL https://raw.githubusercontent.com/shleeshlee/CandyBox-Proxy/main/instal
 
 ### Q: 如何卸载？
 
-**A:** 删除以下文件夹：
+**A:** 使用一键卸载脚本：
+
+```bash
+curl -sL https://raw.githubusercontent.com/shleeshlee/CandyBox-Proxy/main/uninstall.sh | bash
+```
+
+或手动删除以下文件夹：
 
 ```bash
 # 先停酒馆
@@ -276,6 +282,18 @@ pkill -9 node
 rm -rf ~/SillyTavern/plugins/CandyBox
 rm -rf ~/SillyTavern/public/scripts/extensions/third-party/CandyBox
 ```
+
+---
+
+### Q: 如何检查服务状态？
+
+**A:** 使用状态检查脚本：
+
+```bash
+curl -sL https://raw.githubusercontent.com/shleeshlee/CandyBox-Proxy/main/status.sh | bash
+```
+
+或访问 http://127.0.0.1:8811/status 查看 API 状态
 
 ---
 
@@ -310,8 +328,10 @@ CandyBox-Proxy/
 │   ├── index.js      # 扩展入口
 │   ├── style.css     # 样式
 │   └── manifest.json
-├── docs/             # 文档图片
 ├── install.sh        # 一键安装脚本
+├── uninstall.sh      # 一键卸载脚本
+├── status.sh         # 状态检查脚本
+├── setup.sh          # 本地安装脚本
 └── README.md
 ```
 

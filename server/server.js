@@ -1,10 +1,13 @@
 /**
  * 🍬 CandyBox Proxy - Server
- * CandyBox Proxy - Relay Server
  * 
- * 作者: shleeshlee
+ * 版本: 1.0.0
+ * 作者: WanWan
  * 端口: HTTP 8811 / WebSocket 9111
  * 仓库: https://github.com/shleeshlee/CandyBox-Proxy
+ * 
+ * 免费开源，禁止倒卖
+ * 如果你是付费获取的本项目，你被骗了！
  */
 
 const express = require('express');
@@ -203,11 +206,14 @@ class ProxyServer extends EventEmitter {
       
       console.log('');
       console.log('🍬 ═══════════════════════════════════════════');
-      console.log('🍬  CandyBox Proxy Started!');
+      console.log('🍬  CandyBox Proxy v1.0.0');
+      console.log('🍬  作者: WanWan');
       console.log('🍬 ═══════════════════════════════════════════');
       console.log(`🍬  HTTP:      http://${this.config.HOST}:${this.config.HTTP_PORT}`);
       console.log(`🍬  WebSocket: ws://${this.config.HOST}:${this.config.WS_PORT}`);
       console.log(`🍬  状态检查:  http://127.0.0.1:${this.config.HTTP_PORT}/status`);
+      console.log('🍬 ═══════════════════════════════════════════');
+      console.log('🍬  免费开源，禁止倒卖');
       console.log('🍬 ═══════════════════════════════════════════');
       console.log('');
       

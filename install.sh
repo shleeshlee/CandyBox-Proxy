@@ -6,6 +6,8 @@
 # 仓库: https://github.com/shleeshlee/CandyBox-Proxy
 # ============================================
 
+VERSION="1.0.0"
+
 # 颜色定义
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -14,6 +16,34 @@ CYAN='\033[0;36m'
 MAGENTA='\033[0;35m'
 BOLD='\033[1m'
 NC='\033[0m'
+
+# 回滚标记
+PLUGIN_INSTALLED=false
+EXT_INSTALLED=false
+ROLLBACK_PLUGIN_DIR=""
+ROLLBACK_EXT_DIR=""
+
+# 清理函数（安装失败时调用）
+cleanup_on_failure() {
+    echo ""
+    echo -e "${RED}[ERROR]${NC} 安装失败，正在回滚..."
+    
+    if $PLUGIN_INSTALLED && [ -n "$ROLLBACK_PLUGIN_DIR" ]; then
+        rm -rf "$ROLLBACK_PLUGIN_DIR" 2>/dev/null
+        echo -e "${YELLOW}[ROLLBACK]${NC} 已删除插件目录"
+    fi
+    
+    if $EXT_INSTALLED && [ -n "$ROLLBACK_EXT_DIR" ]; then
+        rm -rf "$ROLLBACK_EXT_DIR" 2>/dev/null
+        echo -e "${YELLOW}[ROLLBACK]${NC} 已删除扩展目录"
+    fi
+    
+    echo -e "${RED}安装已回滚，请检查错误信息后重试${NC}"
+    exit 1
+}
+
+# 捕获错误
+trap cleanup_on_failure ERR
 
 clear
 
@@ -31,7 +61,7 @@ echo -e "${NC}"
 
 echo -e "${MAGENTA}╔═══════════════════════════════════════════════════════════════╗${NC}"
 echo -e "${MAGENTA}║                                                               ║${NC}"
-echo -e "${MAGENTA}║  ${BOLD}CandyBox Proxy${NC}${MAGENTA} - 通过浏览器身份免费使用 Gemini API        ║${NC}"
+echo -e "${MAGENTA}║  ${BOLD}CandyBox Proxy${NC}${MAGENTA} v${VERSION} - 通过浏览器身份免费使用 Gemini   ║${NC}"
 echo -e "${MAGENTA}║                                                               ║${NC}"
 echo -e "${MAGENTA}║  ${CYAN}作者: WanWan${NC}${MAGENTA}                                              ║${NC}"
 echo -e "${MAGENTA}║  ${CYAN}GitHub: https://github.com/shleeshlee/CandyBox-Proxy${NC}${MAGENTA}      ║${NC}"
@@ -42,6 +72,41 @@ echo -e "${MAGENTA}║  ${YELLOW}⚠ 如果你是付费获取的本项目，你�
 echo -e "${MAGENTA}║                                                               ║${NC}"
 echo -e "${MAGENTA}╚═══════════════════════════════════════════════════════════════╝${NC}"
 echo ""
+
+# ========== 端口冲突检测 ==========
+check_port_conflict() {
+    local port=$1
+    local name=$2
+    
+    if command -v lsof &> /dev/null; then
+        if lsof -i:$port &> /dev/null; then
+            echo -e "${YELLOW}[WARN]${NC} 端口 $port ($name) 已被占用"
+            return 1
+        fi
+    elif command -v netstat &> /dev/null; then
+        if netstat -tuln 2>/dev/null | grep -q ":$port "; then
+            echo -e "${YELLOW}[WARN]${NC} 端口 $port ($name) 已被占用"
+            return 1
+        fi
+    fi
+    return 0
+}
+
+# 检查端口
+PORT_CONFLICT=false
+if ! check_port_conflict 8811 "HTTP 代理"; then
+    PORT_CONFLICT=true
+fi
+if ! check_port_conflict 9111 "WebSocket"; then
+    PORT_CONFLICT=true
+fi
+
+if $PORT_CONFLICT; then
+    echo ""
+    echo -e "${YELLOW}检测到端口冲突，可能是之前的 CandyBox 仍在运行${NC}"
+    echo -e "${CYAN}提示: 重启 SillyTavern 后端口会自动释放${NC}"
+    echo ""
+fi
 
 log_info() { echo -e "${CYAN}[INFO]${NC} $1"; }
 log_success() { echo -e "${GREEN}[SUCCESS]${NC} $1"; }
@@ -123,6 +188,9 @@ log_info "正在下载 CandyBox Proxy..."
 
 cd "$PLUGINS_DIR"
 
+# 设置回滚路径
+ROLLBACK_PLUGIN_DIR="$PLUGIN_INSTALL_DIR"
+
 if ! git clone --depth 1 https://github.com/shleeshlee/CandyBox-Proxy.git CandyBox 2>/dev/null; then
     log_error "下载失败！请检查网络连接。"
     echo ""
@@ -133,6 +201,7 @@ if ! git clone --depth 1 https://github.com/shleeshlee/CandyBox-Proxy.git CandyB
     exit 1
 fi
 
+PLUGIN_INSTALLED=true
 log_success "下载完成"
 
 # 复制入口文件到插件根目录（SillyTavern 要求）
@@ -161,9 +230,12 @@ fi
 # ============================================
 log_info "正在安装扩展..."
 
+ROLLBACK_EXT_DIR="$EXT_INSTALL_DIR"
+
 mkdir -p "$EXT_INSTALL_DIR"
 cp -r "$PLUGIN_INSTALL_DIR/extension/"* "$EXT_INSTALL_DIR/"
 
+EXT_INSTALLED=true
 log_success "扩展安装完成"
 
 # ============================================
@@ -188,10 +260,14 @@ fi
 # ============================================
 # 8. 完成
 # ============================================
+
+# 取消错误捕获
+trap - ERR
+
 echo ""
 echo -e "${GREEN}════════════════════════════════════════════════════════════════════${NC}"
 echo ""
-echo -e "${GREEN}${BOLD}  ✓ 安装成功！${NC}"
+echo -e "${GREEN}${BOLD}  ✓ 安装成功！${NC} (v${VERSION})"
 echo ""
 echo -e "${CYAN}════════════════════════════════════════════════════════════════════${NC}"
 echo ""
@@ -213,9 +289,15 @@ echo ""
 echo -e "     4️⃣  在酒馆设置代理"
 echo -e "         API → Google AI Studio → Proxy → 选择「CandyBox」"
 echo ""
+echo -e "${CYAN}────────────────────────────────────────────────────────────────────${NC}"
+echo ""
+echo -e "  ${BOLD}🔧 常用命令:${NC}"
+echo -e "     检查状态: ${CYAN}curl -sL https://raw.githubusercontent.com/shleeshlee/CandyBox-Proxy/main/status.sh | bash${NC}"
+echo -e "     卸载:     ${CYAN}curl -sL https://raw.githubusercontent.com/shleeshlee/CandyBox-Proxy/main/uninstall.sh | bash${NC}"
+echo ""
 echo -e "${MAGENTA}════════════════════════════════════════════════════════════════════${NC}"
 echo ""
-echo -e "  ${BOLD}CandyBox Proxy${NC} - 开源免费"
+echo -e "  ${BOLD}CandyBox Proxy${NC} v${VERSION} - 开源免费"
 echo -e "  作者: ${CYAN}WanWan${NC}"
 echo -e "  GitHub: ${CYAN}https://github.com/shleeshlee/CandyBox-Proxy${NC}"
 echo ""

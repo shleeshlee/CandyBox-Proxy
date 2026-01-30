@@ -1,9 +1,12 @@
 /**
  * 🍬 CandyBox Proxy - SillyTavern Extension
  * 
- * 功能：一键打开 Applet
- * 作者：shleeshlee
- * 仓库：https://github.com/shleeshlee/CandyBox-Proxy
+ * 版本: 1.0.0
+ * 功能: 一键打开 Applet
+ * 作者: WanWan
+ * 仓库: https://github.com/shleeshlee/CandyBox-Proxy
+ * 
+ * 免费开源，禁止倒卖
  */
 
 import { extension_settings, getContext } from '../../../extensions.js';
