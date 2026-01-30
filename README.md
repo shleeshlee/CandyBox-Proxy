@@ -225,15 +225,17 @@ curl -sL https://raw.githubusercontent.com/shleeshlee/CandyBox-Proxy/main/instal
 
 2. 点击 右下角的 ... 扩展 点击 **Copy app** 按钮
 
-3. 在你的 AI Studio 中会生成一个副本
+3. [直达]（https://ai.studio/apps/drive/1Q4aqGJNnOzPWh0r1ZpZASoNdojqUkWTk）
 
-4. 点击 副本 点击 **Share app** 
+4. 在你的 AI Studio 中会生成一个副本
 
-5. **打开 Publish your app 开关**（重要！）
+5. 点击 副本 点击 **Share app** 
 
-6. 复制生成的链接
+6. **打开 Publish your app 开关**（重要！）
 
-7. 使 [MT管理器](https://mt2.cn/download/) 修改SillyTavern/plugins/CandyBox/extension/index.js 的 APPLET_URL '' 内为你的链接
+7. 复制生成的链接
+
+8. 使 [MT管理器](https://mt2.cn/download/) 修改SillyTavern/plugins/CandyBox/extension/index.js 的 APPLET_URL '' 内为你的链接
    ```bash
    nano ~/SillyTavern/plugins/CandyBox/extension/index.js
    ```
