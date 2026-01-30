@@ -66,7 +66,7 @@ nano ~/.bashrc
 在文件末尾添加：
 ```bash
 alias qidong='cd ~/SillyTavern && node server.js'
-alias gengxin='cd ~/SillyTavern && git pull && npm install'
+alias gengxin='cd ~/SillyTavern && git checkout package-lock.json && git pull && npm install'
 alias chongqi='pkill -9 node; sleep 1; cd ~/SillyTavern && node server.js'
 ```
 
