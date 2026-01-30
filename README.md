@@ -4,6 +4,10 @@
 
 > 让你的 SillyTavern 酒馆连接 Google AI Studio，无需 API Key
 
+> **👤 作者:** WanWan  
+> **📦 开源协议:** MIT (免费使用，保留署名)  
+> **⚠️ 声明:** 本项目完全免费开源，如果你是付费获取的，你被骗了！
+
 ---
 
 ## 📦 一键安装
@@ -328,10 +332,11 @@ MIT License
 
 ## 🍬 作者
 
-**shleeshlee**
+**WanWan**
 
 - GitHub: [@shleeshlee](https://github.com/shleeshlee)
 
 ---
 
-> 🍬 CandyBox Proxy - Sweet connection to your AI world
+> 🍬 CandyBox Proxy - Sweet connection to your AI world  
+> ⚠️ 本项目免费开源，如果你是付费获取的，你被骗了！

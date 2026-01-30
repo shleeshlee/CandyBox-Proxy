@@ -2,23 +2,46 @@
 
 # ============================================
 # 🍬 CandyBox Proxy 一键安装脚本
-# 作者: shleeshlee
+# 作者: WanWan
 # 仓库: https://github.com/shleeshlee/CandyBox-Proxy
 # ============================================
-
-echo ""
-echo "🍬 ════════════════════════════════════════"
-echo "🍬  CandyBox Proxy 一键安装"
-echo "🍬  CandyBox Proxy - Connect SillyTavern to Gemini"
-echo "🍬 ════════════════════════════════════════"
-echo ""
 
 # 颜色定义
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 CYAN='\033[0;36m'
+MAGENTA='\033[0;35m'
+BOLD='\033[1m'
 NC='\033[0m'
+
+clear
+
+# ========== 署名横幅 ==========
+echo -e "${MAGENTA}"
+cat << "EOF"
+   ____                _       ____            
+  / ___|__ _ _ __   __| |_   _| __ )  _____  __
+ | |   / _` | '_ \ / _` | | | |  _ \ / _ \ \/ /
+ | |__| (_| | | | | (_| | |_| | |_) | (_) >  < 
+  \____\__,_|_| |_|\__,_|\__, |____/ \___/_/\_\
+                         |___/                 
+EOF
+echo -e "${NC}"
+
+echo -e "${MAGENTA}╔═══════════════════════════════════════════════════════════════╗${NC}"
+echo -e "${MAGENTA}║                                                               ║${NC}"
+echo -e "${MAGENTA}║  ${BOLD}CandyBox Proxy${NC}${MAGENTA} - 通过浏览器身份免费使用 Gemini API        ║${NC}"
+echo -e "${MAGENTA}║                                                               ║${NC}"
+echo -e "${MAGENTA}║  ${CYAN}作者: WanWan${NC}${MAGENTA}                                              ║${NC}"
+echo -e "${MAGENTA}║  ${CYAN}GitHub: https://github.com/shleeshlee/CandyBox-Proxy${NC}${MAGENTA}      ║${NC}"
+echo -e "${MAGENTA}║                                                               ║${NC}"
+echo -e "${MAGENTA}║  ${GREEN}✓ 免费开源 | ✓ MIT 协议 | ✓ 禁止倒卖${NC}${MAGENTA}                     ║${NC}"
+echo -e "${MAGENTA}║                                                               ║${NC}"
+echo -e "${MAGENTA}║  ${YELLOW}⚠ 如果你是付费获取的本项目，你被骗了！${NC}${MAGENTA}                  ║${NC}"
+echo -e "${MAGENTA}║                                                               ║${NC}"
+echo -e "${MAGENTA}╚═══════════════════════════════════════════════════════════════╝${NC}"
+echo ""
 
 log_info() { echo -e "${CYAN}[INFO]${NC} $1"; }
 log_success() { echo -e "${GREEN}[SUCCESS]${NC} $1"; }
@@ -166,24 +189,38 @@ fi
 # 8. 完成
 # ============================================
 echo ""
-echo "🍬 ════════════════════════════════════════"
-echo -e "🍬  ${GREEN}安装成功！${NC}"
-echo "🍬 ════════════════════════════════════════"
+echo -e "${GREEN}════════════════════════════════════════════════════════════════════${NC}"
 echo ""
-echo "📍 插件位置: $PLUGIN_INSTALL_DIR"
-echo "📍 扩展位置: $EXT_INSTALL_DIR"
+echo -e "${GREEN}${BOLD}  ✓ 安装成功！${NC}"
 echo ""
-echo "🎮 下一步操作："
+echo -e "${CYAN}════════════════════════════════════════════════════════════════════${NC}"
 echo ""
-echo "   1️⃣  重启 SillyTavern"
+echo -e "  ${BOLD}📍 安装位置:${NC}"
+echo -e "     插件: $PLUGIN_INSTALL_DIR"
+echo -e "     扩展: $EXT_INSTALL_DIR"
 echo ""
-echo "   2️⃣  可选 在 AI Studio 创建自己的 Applet"
-echo "       选择copy app 在copy版本 share app获取连接"
+echo -e "${CYAN}────────────────────────────────────────────────────────────────────${NC}"
 echo ""
-echo "   3️⃣  打开 Applet → 点击「启动服务」"
+echo -e "  ${BOLD}🎮 下一步操作:${NC}"
 echo ""
-echo "   4️⃣  在酒馆设置代理"
-echo "       API → GoogleAIStudio → Proxy → Select「CandyBox」"
+echo -e "     1️⃣  重启 SillyTavern"
 echo ""
-echo "🍬 ════════════════════════════════════════"
+echo -e "     2️⃣  可选：在 AI Studio 创建自己的 Applet"
+echo -e "         选择 Copy App → Share App 获取链接"
+echo ""
+echo -e "     3️⃣  打开 Applet → 点击「启动服务」"
+echo ""
+echo -e "     4️⃣  在酒馆设置代理"
+echo -e "         API → Google AI Studio → Proxy → 选择「CandyBox」"
+echo ""
+echo -e "${MAGENTA}════════════════════════════════════════════════════════════════════${NC}"
+echo ""
+echo -e "  ${BOLD}CandyBox Proxy${NC} - 开源免费"
+echo -e "  作者: ${CYAN}WanWan${NC}"
+echo -e "  GitHub: ${CYAN}https://github.com/shleeshlee/CandyBox-Proxy${NC}"
+echo ""
+echo -e "  ${YELLOW}★ 如果觉得好用，请给项目点个 Star！${NC}"
+echo -e "  ${RED}✗ 本项目免费开源，如果你是付费获取的，你被骗了！${NC}"
+echo ""
+echo -e "${MAGENTA}════════════════════════════════════════════════════════════════════${NC}"
 echo ""
