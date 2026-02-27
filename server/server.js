@@ -242,6 +242,11 @@ class ProxyServer extends EventEmitter {
       });
     });
 
+    // 拦截酒馆健康检查（/accounts 不存在于 Gemini API）
+    app.get('/accounts', (req, res) => {
+      res.json({ accounts: [{ id: 'candybox', name: 'CandyBox Proxy' }] });
+    });
+
     // 代理所有其他请求
     app.all('*', (req, res) => this.handleRequest(req, res));
 
