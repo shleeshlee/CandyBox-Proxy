@@ -18,7 +18,7 @@ const EXTENSION_NAME = 'CandyBox';
 // ============================================
 const CONFIG = {
   // Applet 地址 - 替换为你自己的
-  APPLET_URL: 'https://ai.studio/apps/drive/1Q4aqGJNnOzPWh0r1ZpZASoNdojqUkWTk',
+  APPLET_URL: 'https://ai.studio/apps/e85b0520-2456-4f2b-a244-18ff0f815bdd',
   
   // 代理设置
   PROXY_URL: 'http://127.0.0.1:8811',

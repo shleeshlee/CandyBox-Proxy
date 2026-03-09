@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0" />
+    <title>SillyTavern Gemini Proxy</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['PingFang SC', 'Microsoft YaHei', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+            },
+            colors: {
+              unicorn: {
+                50: '#fff0f5', // Lavender Blush
+                100: '#ffe4e1', // Misty Rose
+                200: '#e6e6fa', // Lavender
+                300: '#d8b4fe',
+                400: '#f472b6', // Pink
+                500: '#a855f7', // Purple
+                600: '#9333ea',
+              }
+            }
+          }
+        }
+      }
+    </script>
+    <style>
+      /* Custom Scrollbar - Cute & Cyber */
+      ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.3);
+      }
+      .dark ::-webkit-scrollbar-track {
+        background: rgba(15, 23, 42, 0.3);
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #f472b6; /* Pink */
+        border-radius: 10px;
+        border: 2px solid rgba(255, 255, 255, 0.5);
+      }
+      .dark ::-webkit-scrollbar-thumb {
+        background: #a855f7; /* Purple */
+        border: 2px solid rgba(15, 23, 42, 0.5);
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #d8b4fe;
+      }
+      
+      /* Glass Utility - Adaptive Light/Dark */
+      .glass-card {
+        /* Light Mode: Cotton Candy */
+        background: rgba(255, 255, 255, 0.45);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.6);
+        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+        transition: all 0.3s ease;
+      }
+      
+      /* Dark Mode: Cyber Amethyst */
+      .dark .glass-card {
+        background: rgba(15, 23, 42, 0.6); /* slate-900/60 */
+        border: 1px solid rgba(168, 85, 247, 0.2); /* purple-500/20 */
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@^19.2.4",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.4/",
+    "react/": "https://esm.sh/react@^19.2.4/",
+    "lucide-react": "https://esm.sh/lucide-react@^0.563.0",
+    "vite": "https://esm.sh/vite@^7.3.1"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+  <body class="bg-gradient-to-br from-pink-100 via-purple-100 to-cyan-100 dark:from-slate-950 dark:via-purple-950 dark:to-slate-900 min-h-screen text-slate-700 dark:text-purple-100 antialiased selection:bg-pink-300 selection:text-white dark:selection:bg-purple-600 transition-colors duration-500">
+    <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
+</body>
+</html>
