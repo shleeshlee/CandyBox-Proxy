@@ -223,17 +223,20 @@ log_success "下载完成"
 cp "$PLUGINS_DIR/CandyBox/server/package.json" "$PLUGINS_DIR/CandyBox/"
 cp "$PLUGINS_DIR/CandyBox/server/index.js" "$PLUGINS_DIR/CandyBox/"
 # 修复模块引用路径
-sed -i "s|require('./server')|require('./server/server')|g" "$PLUGINS_DIR/CandyBox/index.js"
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    sed -i '' "s|require('./server')|require('./server/server')|g" "$PLUGINS_DIR/CandyBox/index.js"
+else
+    sed -i.bak "s|require('./server')|require('./server/server')|g" "$PLUGINS_DIR/CandyBox/index.js"
+    rm -f "$PLUGINS_DIR/CandyBox/index.js.bak"
+fi
 
 # ============================================
 # 5. 安装依赖
 # ============================================
 log_info "正在安装依赖..."
 
-cd "$PLUGIN_INSTALL_DIR/server"
-
 if command -v npm &> /dev/null; then
-    npm install --silent 2>/dev/null || log_warn "npm install 有警告，但可能不影响使用"
+    (cd "$PLUGIN_INSTALL_DIR/server" && npm install --silent 2>/dev/null) || log_warn "npm install 有警告，但可能不影响使用"
     log_success "依赖安装完成"
 else
     log_warn "未检测到 npm，跳过依赖安装"
@@ -264,7 +267,8 @@ if [ -f "$CONFIG_FILE" ]; then
         if [[ "$OSTYPE" == "darwin"* ]]; then
             sed -i '' 's/enableServerPlugins: false/enableServerPlugins: true/g' "$CONFIG_FILE"
         else
-            sed -i 's/enableServerPlugins: false/enableServerPlugins: true/g' "$CONFIG_FILE"
+            sed -i.bak 's/enableServerPlugins: false/enableServerPlugins: true/g' "$CONFIG_FILE"
+            rm -f "$CONFIG_FILE.bak"
         fi
         log_success "Server Plugins 已启用"
     else

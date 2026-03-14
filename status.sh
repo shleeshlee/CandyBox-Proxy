@@ -35,13 +35,13 @@ check_port() {
             echo -e "  ${GREEN}✓${NC} $name (端口 $port): ${GREEN}运行中${NC}"
             return 0
         fi
-    elif command -v netstat &> /dev/null; then
-        if netstat -tuln 2>/dev/null | grep -q ":$port "; then
+    elif command -v ss &> /dev/null; then
+        if ss -tuln 2>/dev/null | grep -q ":$port "; then
             echo -e "  ${GREEN}✓${NC} $name (端口 $port): ${GREEN}运行中${NC}"
             return 0
         fi
-    elif command -v ss &> /dev/null; then
-        if ss -tuln 2>/dev/null | grep -q ":$port "; then
+    elif command -v netstat &> /dev/null; then
+        if netstat -ano 2>/dev/null | grep -qE "LISTEN.*:$port |:$port .*LISTEN"; then
             echo -e "  ${GREEN}✓${NC} $name (端口 $port): ${GREEN}运行中${NC}"
             return 0
         fi
@@ -100,7 +100,7 @@ echo ""
 
 # 查找 SillyTavern
 ST_DIR=""
-for path in "$HOME/SillyTavern" "$HOME/sillytavern" "/data/data/com.termux/files/home/SillyTavern"; do
+for path in "$(pwd)/SillyTavern" "$(pwd)/../SillyTavern" "$HOME/SillyTavern" "$HOME/sillytavern" "/data/data/com.termux/files/home/SillyTavern"; do
     if [ -d "$path" ] && [ -f "$path/server.js" ]; then
         ST_DIR="$path"
         break

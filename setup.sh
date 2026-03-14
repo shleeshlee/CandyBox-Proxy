@@ -55,10 +55,10 @@ cp "$SCRIPT_DIR/server/index.js" "$ST_DIR/plugins/CandyBox/"
 if [[ "$OSTYPE" == "darwin"* ]]; then
     sed -i '' "s|require('./server')|require('./server/server')|g" "$ST_DIR/plugins/CandyBox/index.js"
 else
-    sed -i "s|require('./server')|require('./server/server')|g" "$ST_DIR/plugins/CandyBox/index.js"
+    sed -i.bak "s|require('./server')|require('./server/server')|g" "$ST_DIR/plugins/CandyBox/index.js"
+    rm -f "$ST_DIR/plugins/CandyBox/index.js.bak"
 fi
-cd "$ST_DIR/plugins/CandyBox/server" && npm install --silent
-cd - > /dev/null
+(cd "$ST_DIR/plugins/CandyBox/server" && npm install --silent)
 echo "✓ Server 插件安装完成"
 
 # 安装 Extension
