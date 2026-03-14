@@ -56,30 +56,39 @@ function openApplet() {
 // ============================================
 // 注册代理
 // ============================================
+function injectProxy() {
+  import('../../../openai.js').then(({ proxies }) => {
+    if (!proxies) return;
+
+    if (!proxies.find(p => p.name === CONFIG.PROXY_NAME)) {
+      proxies.push({
+        name: CONFIG.PROXY_NAME,
+        url: CONFIG.PROXY_URL,
+        password: '',
+      });
+    }
+
+    // 往下拉框补选项（如果还没有）
+    const select = document.querySelector('#openai_proxy_preset');
+    if (select && !select.querySelector(`option[value="${CONFIG.PROXY_NAME}"]`)) {
+      const option = document.createElement('option');
+      option.text = CONFIG.PROXY_NAME;
+      option.value = CONFIG.PROXY_NAME;
+      select.appendChild(option);
+      console.log(`[${EXTENSION_NAME}] 🍬 代理已注册: ${CONFIG.PROXY_NAME}`);
+    }
+  }).catch(() => {});
+}
+
 function registerProxy() {
-  try {
-    import('../../../openai.js').then(({ proxies }) => {
-      if (!proxies) return;
-      
-      if (!proxies.find(p => p.name === CONFIG.PROXY_NAME)) {
-        proxies.push({
-          name: CONFIG.PROXY_NAME,
-          url: CONFIG.PROXY_URL,
-          password: '',
-        });
+  // 立即尝试一次
+  injectProxy();
 
-        const select = document.querySelector('#openai_proxy_preset');
-        if (select) {
-          const option = document.createElement('option');
-          option.text = CONFIG.PROXY_NAME;
-          option.value = CONFIG.PROXY_NAME;
-          select.appendChild(option);
-        }
-
-        console.log(`[${EXTENSION_NAME}] 🍬 代理已注册: ${CONFIG.PROXY_NAME}`);
-      }
-    }).catch(() => {});
-  } catch {}
+  // 监听下拉框重建（ST 的 loadProxyPresets 会 empty + 重建）
+  const select = document.querySelector('#openai_proxy_preset');
+  if (select) {
+    new MutationObserver(() => injectProxy()).observe(select, { childList: true });
+  }
 }
 
 // ============================================

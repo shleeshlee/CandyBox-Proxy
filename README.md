@@ -203,7 +203,7 @@ curl -sL https://raw.githubusercontent.com/shleeshlee/CandyBox-Proxy/main/instal
 
 ### 3️⃣ 启动服务
 
-首次启动点击allow xxx 在 Applet 页面点击「**连接服务**」按钮
+首次启动时点击 Allow（允许权限），然后在 Applet 页面点击「**连接服务**」按钮
 
 ### 4️⃣ 配置酒馆
 
@@ -305,7 +305,7 @@ curl -sL https://raw.githubusercontent.com/shleeshlee/CandyBox-Proxy/main/status
 4. 在打开的页面中，点击**使用此文件夹**
 5. 选择「**允许**」
 6. 点击「**Termux Home**」
-7. /storage/BA73-022B/Silly Tavern 点击**右上角三个竖点图标** 设为主页
+7. 找到 SillyTavern 所在目录，点击**右上角三个竖点图标** 设为主页
 
 ---
 

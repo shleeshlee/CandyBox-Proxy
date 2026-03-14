@@ -44,7 +44,11 @@ mkdir -p SillyTavern/plugins/CandyBox
 cp -r "$SCRIPT_DIR/server" SillyTavern/plugins/CandyBox/
 cp "$SCRIPT_DIR/server/package.json" SillyTavern/plugins/CandyBox/
 cp "$SCRIPT_DIR/server/index.js" SillyTavern/plugins/CandyBox/
-sed -i "s|require('./server')|require('./server/server')|g" SillyTavern/plugins/CandyBox/index.js
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    sed -i '' "s|require('./server')|require('./server/server')|g" SillyTavern/plugins/CandyBox/index.js
+else
+    sed -i "s|require('./server')|require('./server/server')|g" SillyTavern/plugins/CandyBox/index.js
+fi
 cd SillyTavern/plugins/CandyBox/server && npm install --silent
 cd - > /dev/null
 echo "✓ Server 插件安装完成"
