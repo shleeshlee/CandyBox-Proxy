@@ -151,7 +151,7 @@ curl -sL https://raw.githubusercontent.com/shleeshlee/CandyBox-Proxy/main/instal
 
 1. 安装 [Git](https://git-scm.com/download/win)
 2. 安装 [Node.js](https://nodejs.org/)（选择 LTS 版本）
-3. 打开 **Git Bash** 或 **PowerShell**
+3. 右键桌面 → **Git Bash Here**（或从开始菜单打开 Git Bash）
 4. 运行：
 
 ```bash
