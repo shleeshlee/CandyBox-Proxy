@@ -118,8 +118,18 @@ log_error() { echo -e "${RED}[ERROR]${NC} $1"; }
 # ============================================
 log_info "正在查找 SillyTavern..."
 
-ST_DIR=""
+# 用户通过 ST_DIR 环境变量手动指定
+if [ -n "$ST_DIR" ]; then
+    if [ -d "$ST_DIR" ] && [ -f "$ST_DIR/server.js" ]; then
+        log_success "使用指定路径: $ST_DIR"
+    else
+        log_error "指定的路径无效: $ST_DIR"
+        exit 1
+    fi
+fi
 
+# 自动搜索（未手动指定时）
+if [ -z "$ST_DIR" ]; then
 # 常见位置（包括 Termux）
 POSSIBLE_PATHS=(
     "$(pwd)/SillyTavern"
@@ -150,6 +160,8 @@ if [ -z "$ST_DIR" ]; then
         ST_DIR=$(dirname "$FOUND")
     fi
 fi
+
+fi  # 结束自动搜索
 
 # 还是没找到
 if [ -z "$ST_DIR" ]; then
