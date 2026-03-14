@@ -122,14 +122,17 @@ ST_DIR=""
 
 # 常见位置（包括 Termux）
 POSSIBLE_PATHS=(
+    "$(pwd)/SillyTavern"
+    "$(pwd)/sillytavern"
+    "$(pwd)/../SillyTavern"
+    "$(pwd)"
+    "$(pwd)/.."
     "$HOME/SillyTavern"
     "$HOME/sillytavern"
     "$HOME/st"
     "$HOME/ST"
     "/data/data/com.termux/files/home/SillyTavern"
     "/data/data/com.termux/files/home/sillytavern"
-    "$(pwd)"
-    "$(pwd)/.."
 )
 
 for path in "${POSSIBLE_PATHS[@]}"; do
@@ -142,7 +145,7 @@ done
 # 如果没找到，用 find 搜索
 if [ -z "$ST_DIR" ]; then
     log_info "常见位置未找到，正在搜索..."
-    FOUND=$(find ~ -maxdepth 4 -name "server.js" -path "*SillyTavern*" 2>/dev/null | head -1)
+    FOUND=$(find ~ "$(pwd)" -maxdepth 4 -name "server.js" -path "*SillyTavern*" 2>/dev/null | head -1)
     if [ -n "$FOUND" ]; then
         ST_DIR=$(dirname "$FOUND")
     fi
