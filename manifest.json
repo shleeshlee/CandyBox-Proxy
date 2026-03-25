@@ -1,0 +1,12 @@
+{
+  "name": "CandyBox",
+  "display_name": "CandyBox Proxy",
+  "loading_order": 1,
+  "requires": [],
+  "optional": [],
+  "js": "extension/index.js",
+  "css": "extension/style.css",
+  "author": "shleeshlee",
+  "version": "1.0.0",
+  "auto_update": true
+}
