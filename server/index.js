@@ -69,7 +69,7 @@ async function init(router) {
     res.json({
       name: 'CandyBox Proxy',
       status: 'running',
-      ports: { http: 8811, ws: 9111 },
+      ports: { http: proxyServer.config.HTTP_PORT, ws: proxyServer.config.WS_PORT },
     });
   });
 

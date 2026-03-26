@@ -1,7 +1,7 @@
 /**
  * 🍬 CandyBox Proxy - Server
  * 
- * 版本: 1.0.0
+ * 版本: 1.0.2
  * 作者: WanWan
  * 端口: HTTP 8811 / WebSocket 9111
  * 仓库: https://github.com/shleeshlee/CandyBox-Proxy
@@ -206,7 +206,7 @@ class ProxyServer extends EventEmitter {
       
       console.log('');
       console.log('🍬 ═══════════════════════════════════════════');
-      console.log('🍬  CandyBox Proxy v1.0.0');
+      console.log('🍬  CandyBox Proxy v1.0.2');
       console.log('🍬  作者: WanWan');
       console.log('🍬 ═══════════════════════════════════════════');
       console.log(`🍬  HTTP:      http://${this.config.HOST}:${this.config.HTTP_PORT}`);
@@ -253,24 +253,50 @@ class ProxyServer extends EventEmitter {
     this.httpServer = http.createServer(app);
 
     return new Promise((resolve, reject) => {
-      this.httpServer.listen(this.config.HTTP_PORT, this.config.HOST, resolve);
-      this.httpServer.once('error', reject);
+      let started = false;
+
+      this.httpServer.on('error', (err) => {
+        if (!started) {
+          reject(err);
+        } else {
+          log.error(`HTTP服务器错误: ${err.message}`);
+          this.emit('error', err);
+        }
+      });
+
+      this.httpServer.listen(this.config.HTTP_PORT, this.config.HOST, () => {
+        started = true;
+        resolve();
+      });
     });
   }
 
   async startWebSocket() {
-    this.wsServer = new WebSocket.Server({
-      port: this.config.WS_PORT,
-      host: this.config.HOST,
-    });
+    return new Promise((resolve, reject) => {
+      let started = false;
 
-    this.wsServer.on('connection', (ws, req) => {
-      this.connections.add(ws, { address: req.socket.remoteAddress });
-    });
+      this.wsServer = new WebSocket.Server({
+        port: this.config.WS_PORT,
+        host: this.config.HOST,
+      });
 
-    this.wsServer.on('error', (err) => {
-      log.error(`WebSocket服务器错误: ${err.message}`);
-      this.emit('error', err);
+      this.wsServer.on('connection', (ws, req) => {
+        this.connections.add(ws, { address: req.socket.remoteAddress });
+      });
+
+      this.wsServer.on('error', (err) => {
+        log.error(`WebSocket服务器错误: ${err.message}`);
+        if (!started) {
+          reject(err);
+        } else {
+          this.emit('error', err);
+        }
+      });
+
+      this.wsServer.once('listening', () => {
+        started = true;
+        resolve();
+      });
     });
   }
 
