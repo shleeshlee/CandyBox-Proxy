@@ -24,37 +24,7 @@ curl -sL https://raw.githubusercontent.com/shleeshlee/CandyBox-Proxy/main/instal
 
 ---
 
-### 方式二：扩展直装
-
-在酒馆内直接安装，无需终端操作。
-
-**第一步：安装扩展**
-
-1. 打开酒馆 → 顶部 **扩展** 图标（拼图形状）
-2. 点击 **Install Extension**
-3. 粘贴地址：
-
-```
-https://github.com/shleeshlee/CandyBox-Proxy
-```
-
-4. 点击安装 → 刷新页面
-
-**第二步：安装服务端插件**
-
-扩展直装只安装了 UI 部分，还需要安装服务端：
-
-```bash
-curl -sL https://raw.githubusercontent.com/shleeshlee/CandyBox-Proxy/main/install.sh | bash
-```
-
-> 脚本会检测到扩展已安装，只补装服务端插件
-
-**第三步：重启酒馆**
-
----
-
-### 方式三：手动安装
+### 方式二：手动安装
 
 适用于无法运行脚本的环境：
 
