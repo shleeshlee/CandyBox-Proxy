@@ -220,7 +220,6 @@ class ProxyServer extends EventEmitter {
       this.emit('started');
     } catch (err) {
       log.error(`启动失败: ${err.message}`);
-      this.emit('error', err);
       throw err;
     }
   }
