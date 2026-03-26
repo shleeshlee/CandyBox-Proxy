@@ -1,50 +1,91 @@
 # 🍬 CandyBox Proxy
 
-**CandyBox Proxy** - 通过浏览器身份免费使用 Gemini API
+**通过浏览器身份免费使用 Gemini API**
 
 > 让你的 SillyTavern 酒馆连接 Google AI Studio，无需 API Key
 
-> **👤 作者:** WanWan  
-> **📦 开源协议:** MIT (免费使用，保留署名)  
-> **⚠️ 声明:** 本项目完全免费开源，如果你是付费获取的，你被骗了！
+> **作者:** WanWan
+> **协议:** MIT (免费使用，保留署名)
+> **声明:** 本项目完全免费开源，如果你是付费获取的，你被骗了！
 
 ---
 
-## 📦 一键安装
+## 安装
 
-复制下面的命令，粘贴到终端运行：
+### 方式一：一键安装（推荐）
+
+复制到终端运行，自动安装插件 + 扩展 + 启用 Server Plugins：
 
 ```bash
 curl -sL https://raw.githubusercontent.com/shleeshlee/CandyBox-Proxy/main/install.sh | bash
 ```
 
-安装完成后按提示操作即可。
+> 安装完成后会检测酒馆是否在运行，可选自动重启
 
 ---
 
-## 📖 详细安装教程
+### 方式二：扩展直装
 
-根据你的设备选择对应教程：
+在酒馆内直接安装，无需终端操作。
+
+**第一步：安装扩展**
+
+1. 打开酒馆 → 顶部 **扩展** 图标（拼图形状）
+2. 点击 **Install Extension**
+3. 粘贴地址：
+
+```
+https://github.com/shleeshlee/CandyBox-Proxy
+```
+
+4. 点击安装 → 刷新页面
+
+**第二步：安装服务端插件**
+
+扩展直装只安装了 UI 部分，还需要安装服务端：
+
+```bash
+curl -sL https://raw.githubusercontent.com/shleeshlee/CandyBox-Proxy/main/install.sh | bash
+```
+
+> 脚本会检测到扩展已安装，只补装服务端插件
+
+**第三步：重启酒馆**
 
 ---
 
-### 📱 手机安装 (Termux)
+### 方式三：手动安装
 
-适用于：Android 手机 / 平板
+适用于无法运行脚本的环境：
 
-#### 第一步：安装 Termux
+1. 下载 [ZIP](https://github.com/shleeshlee/CandyBox-Proxy/archive/main.zip) 并解压
+2. 复制 `server/` 文件夹到 `SillyTavern/plugins/CandyBox/server/`
+3. 复制 `server/package.json` 和 `server/index.js` 到 `SillyTavern/plugins/CandyBox/`
+4. 编辑 `SillyTavern/plugins/CandyBox/index.js`，把 `require('./server')` 改成 `require('./server/server')`
+5. 复制 `extension/` 内容到 `SillyTavern/public/scripts/extensions/third-party/CandyBox/`
+6. 在 `SillyTavern/plugins/CandyBox/server/` 运行 `npm install`
+7. 编辑 `SillyTavern/config.yaml`，设置 `enableServerPlugins: true`
+8. 重启酒馆
 
-1. 下载 [Termux](https://f-droid.org/packages/com.termux/)（推荐从 F-Droid 下载）
-2. 打开 Termux，等待初始化完成
+---
 
-#### 第二步：安装必要工具
+## 各平台安装指引
+
+<details>
+<summary><b>📱 手机 (Termux)</b></summary>
+
+#### 1. 安装 Termux
+
+下载 [Termux](https://f-droid.org/packages/com.termux/)（推荐 F-Droid）
+
+#### 2. 安装必要工具
 
 ```bash
 pkg update && pkg upgrade -y
 pkg install git nodejs -y
 ```
 
-#### 第三步：安装 SillyTavern（如果还没装）
+#### 3. 安装 SillyTavern（如果还没装）
 
 ```bash
 git clone https://github.com/SillyTavern/SillyTavern.git
@@ -52,74 +93,49 @@ cd SillyTavern
 npm install
 ```
 
-##### 设置快捷指令（可选）
+<details>
+<summary>设置快捷指令（可选）</summary>
 
 ```bash
 nano ~/.bashrc
 ```
 
-在文件末尾添加：
+在末尾添加：
+
 ```bash
 alias qidong='cd ~/SillyTavern && node server.js'
 alias gengxin='cd ~/SillyTavern && git checkout package-lock.json && git pull && npm install'
 alias chongqi='pkill -9 node; sleep 1; cd ~/SillyTavern && node server.js'
 ```
 
-保存退出（`Ctrl+X` → `Y` → `Enter`），然后执行：
-```bash
-source ~/.bashrc
-```
+保存（`Ctrl+X` → `Y` → `Enter`），然后 `source ~/.bashrc`
 
-以后输入 `qidong` 启动酒馆，`gengxin` 更新酒馆，`chongqi` 重启酒馆。
+</details>
 
-##### 安装酒馆助手（可选）
-
-1：通过 SillyTavern 内置安装（推荐）
-
-点击顶部的 扩展 图标（拼图形状）
-点击 「Install Extension」
-粘贴这个 URL：
-```bash
-https://github.com/N0VI028/JS-Slash-Runner
-```
-点击安装，等待完成
-刷新页面
-
-2：手动安装（Termux）
-
-```bash
-cd ~/SillyTavern/data/default-user/extensions
-
-git clone https://github.com/N0VI028/JS-Slash-Runner
-```
-刷新页面
-
-#### 第四步：安装 CandyBox
+#### 4. 安装 CandyBox
 
 ```bash
 curl -sL https://raw.githubusercontent.com/shleeshlee/CandyBox-Proxy/main/install.sh | bash
 ```
 
-#### 第五步：启动酒馆
+#### 5. 启动酒馆
 
 ```bash
-cd ~/SillyTavern
-node server.js
+cd ~/SillyTavern && node server.js
 ```
 
-然后在浏览器打开 `http://127.0.0.1:8000`
+浏览器打开 `http://127.0.0.1:8000`
 
----
+</details>
 
-### ☁️ 云端安装 (HuggingFace / Colab / VPS)
-
-适用于：HuggingFace Space / Google Colab / 云服务器
+<details>
+<summary><b>☁️ 云端 (HuggingFace / Colab / VPS)</b></summary>
 
 #### HuggingFace Space
 
-1. 复制一个 SillyTavern Space 到你的账号
-2. 打开 Space 的终端（Files → Terminal）
-3. 运行安装命令：
+1. 复制一个 SillyTavern Space
+2. 打开终端（Files → Terminal）
+3. 运行：
 
 ```bash
 curl -sL https://raw.githubusercontent.com/shleeshlee/CandyBox-Proxy/main/install.sh | bash
@@ -129,194 +145,143 @@ curl -sL https://raw.githubusercontent.com/shleeshlee/CandyBox-Proxy/main/instal
 
 #### Google Colab
 
-在代码单元格中运行：
-
 ```python
 !curl -sL https://raw.githubusercontent.com/shleeshlee/CandyBox-Proxy/main/install.sh | bash
 ```
 
-#### VPS / 云服务器
+#### VPS
 
 ```bash
-# SSH 连接到服务器后
-cd ~
 curl -sL https://raw.githubusercontent.com/shleeshlee/CandyBox-Proxy/main/install.sh | bash
 ```
 
----
+</details>
 
-### 💻 PC 安装 (Windows / Mac / Linux)
+<details>
+<summary><b>💻 PC (Windows / Mac / Linux)</b></summary>
 
 #### Windows
 
-1. 安装 [Git](https://git-scm.com/download/win)
-2. 安装 [Node.js](https://nodejs.org/)（选择 LTS 版本）
-3. 右键桌面 → **Git Bash Here**（或从开始菜单打开 Git Bash）
-4. 运行：
+1. 安装 [Git](https://git-scm.com/download/win) 和 [Node.js](https://nodejs.org/)（LTS）
+2. 右键桌面 → **Git Bash Here**
+3. 运行：
 
 ```bash
 curl -sL https://raw.githubusercontent.com/shleeshlee/CandyBox-Proxy/main/install.sh | bash
 ```
 
-> 💡 Windows 用户如果 curl 不可用，可以手动下载 ZIP：
-> 1. 下载 [CandyBox-Proxy ZIP](https://github.com/shleeshlee/CandyBox-Proxy/archive/main.zip)
-> 2. 解压到 SillyTavern 的**父目录**（即和 SillyTavern 文件夹同级）
-> 3. 进入解压后的文件夹，运行：
->    ```bash
->    bash setup.sh
->    ```
-> 4. 如果 bash 不可用，手动操作：
->    - 复制整个 `server` 文件夹到 `SillyTavern/plugins/CandyBox/`
->    - 再把 `server/package.json` 和 `server/index.js` 复制一份到 `SillyTavern/plugins/CandyBox/` 根目录
->    - 用文本编辑器打开 `SillyTavern/plugins/CandyBox/index.js`，把 `require('./server')` 改成 `require('./server/server')`
->    - 复制 `extension` 文件夹内容到 `SillyTavern/public/scripts/extensions/third-party/CandyBox/`
->    - 在 `SillyTavern/plugins/CandyBox/server/` 运行 `npm install`
+> 如果 curl 不可用，用[方式三：手动安装](#方式三手动安装)
 
-#### Mac
-
-```bash
-# 打开终端
-curl -sL https://raw.githubusercontent.com/shleeshlee/CandyBox-Proxy/main/install.sh | bash
-```
-
-#### Linux
+#### Mac / Linux
 
 ```bash
 curl -sL https://raw.githubusercontent.com/shleeshlee/CandyBox-Proxy/main/install.sh | bash
 ```
 
----
-
-## 🎮 使用方法
-
-安装完成后，按以下步骤操作：
-
-### 1️⃣ 重启 SillyTavern
-
-运行`pkill -9 node`，重新运行 `node server.js`
-
-### 2️⃣ 打开 CandyBox Applet
-
-在酒馆扩展面板点击「✦ ✧ 糖果盒代理」按钮，会自动打开 Applet
-
-> ⚠️ 需要先登录 Google 账号
-
-### 3️⃣ 启动服务
-
-首次启动时点击 Allow（允许权限），然后在 Applet 页面点击「**连接服务**」按钮
-
-### 4️⃣ 配置酒馆
-
-1. 打开酒馆设置
-2. 进入 **API连接配置** → API **聊天补全** → 聊天补全来源 **Google AI Studio** 
-3. 在 **反向代理** 下拉框选择「**CandyBox**」
-4. 选择模型（如 `gemini-2.0-flash`）
-5. 开始聊天！
+</details>
 
 ---
 
-## 🔧 高级选项：创建自己的 Applet
+## 使用方法
 
-如果你想使用自己的 Applet（而不是公共链接），可以按以下步骤操作：
+### 1. 重启 SillyTavern
 
-### 方法：复制现有 Applet   [直达](https://ai.studio/apps/drive/1Q4aqGJNnOzPWh0r1ZpZASoNdojqUkWTk?fullscreenApplet=true)
+```bash
+pkill -9 node
+cd ~/SillyTavern && node server.js
+```
 
-1. 点击 右上角 刷新 旁边的 退出全屏（四角向内图标）
+> 安装脚本会自动提示重启，不重启插件不会生效
 
-2. 点击 右下角的 ... 扩展 点击 **Copy app** 按钮
+### 2. 打开 Applet
 
-3. 在你的 AI Studio 中会生成一个副本
+在酒馆扩展面板点击 **CandyBox Proxy** 按钮，自动打开 Applet
 
-4. 点击 副本 点击 **Share app** 
+> 需要先登录 Google 账号
 
-5. **打开 Publish your app 开关**（重要！）
+### 3. 启动服务
 
-6. 复制生成的链接
+首次点击 Allow 允许权限，然后点击「**连接服务**」
 
-7. 使用 [MT管理器](https://mt2.cn/download/) 修改SillyTavern/plugins/CandyBox/extension/index.js 的 APPLET_URL '' 内为你的链接
-   ```bash
-   nano ~/SillyTavern/plugins/CandyBox/extension/index.js
-   ```
+### 4. 配置酒馆
 
-> ⚠️ **注意**：必须开启 **Publish your app** 才能正常使用！
+1. **API连接配置** → **聊天补全** → 聊天补全来源 **Google AI Studio**
+2. **反向代理** 下拉框选择「**CandyBox**」
+3. 选择模型（如 `gemini-2.0-flash`）
+4. 开始聊天
 
 ---
 
-## 🔌 端口信息
+## 高级选项：创建自己的 Applet
+
+默认使用公共 Applet 链接。如果你想用自己的：
+
+1. 打开 [CandyBox Applet](https://ai.studio/apps/drive/1Q4aqGJNnOzPWh0r1ZpZASoNdojqUkWTk?fullscreenApplet=true)
+2. 点击右上角退出全屏 → 右下角 `...` → **Copy app**
+3. 打开副本 → **Share app** → 开启 **Publish your app**
+4. 复制链接，替换扩展配置中的 APPLET_URL：
+
+```bash
+nano ~/SillyTavern/plugins/CandyBox/extension/index.js
+# 或者编辑 data/default-user/extensions/CandyBox-Proxy/extension/index.js（直装路径）
+```
+
+---
+
+## 端口信息
 
 | 服务 | 端口 | 说明 |
 |------|------|------|
-| HTTP 代理 | 8811 | 酒馆连接这个端口 |
-| WebSocket | 9111 | Applet 连接这个端口 |
+| HTTP 代理 | 8811 | 酒馆连接此端口 |
+| WebSocket | 9111 | Applet 连接此端口 |
 
 ---
 
-## ❓ 常见问题
+## 常见问题
 
-### Q: 如何更新到最新版本？
+**Q: 怎么更新？**
 
-**A:** 重新运行安装命令，会自动覆盖旧版本：
+重新运行安装命令即可覆盖：
 
 ```bash
 curl -sL https://raw.githubusercontent.com/shleeshlee/CandyBox-Proxy/main/install.sh | bash
 ```
 
----
-
-### Q: 如何卸载？
-
-**A:** 使用一键卸载脚本：
+**Q: 怎么卸载？**
 
 ```bash
 curl -sL https://raw.githubusercontent.com/shleeshlee/CandyBox-Proxy/main/uninstall.sh | bash
 ```
 
-或手动删除以下文件夹：
-
-```bash
-# 先停酒馆
-pkill -9 node
-```
-
-```bash
-rm -rf ~/SillyTavern/plugins/CandyBox
-rm -rf ~/SillyTavern/public/scripts/extensions/third-party/CandyBox
-```
-
----
-
-### Q: 如何检查服务状态？
-
-**A:** 使用状态检查脚本：
+**Q: 怎么检查状态？**
 
 ```bash
 curl -sL https://raw.githubusercontent.com/shleeshlee/CandyBox-Proxy/main/status.sh | bash
 ```
 
-或访问 http://127.0.0.1:8811/status 查看 API 状态
+或访问 http://127.0.0.1:8811/status
+
+**Q: 报错 400 Bad Request？**
+
+预设界面 → **推理强度** 选择 **自动**
+
+**Q: 连接错误 / 端口占用？**
+
+重启酒馆（`pkill -9 node` 后重新 `node server.js`）
+
+<details>
+<summary><b>MT 管理器查看/编辑酒馆文件</b></summary>
+
+1. 打开 MT 管理器 → 左上角三条横线
+2. 右上角三个竖点 → 「添加本地存储」
+3. 点击「使用此文件夹」→ 允许
+4. 找到 SillyTavern 目录 → 右上角三个竖点 → 设为主页
+
+</details>
 
 ---
 
-#### 💡 如何用 MT 管理器查看/编辑酒馆文件？
-
-1. 打开 MT 管理器，点击**左上角三条横线图标**
-2. 点击**右上角三个竖点图标**
-3. 点击「**添加本地存储**」
-4. 在打开的页面中，点击**使用此文件夹**
-5. 选择「**允许**」
-6. 点击「**Termux Home**」
-7. 找到 SillyTavern 所在目录，点击**右上角三个竖点图标** 设为主页
-
----
-
-### Q: 如何解决400报错？
-Google AI Studio API returned error: 400 Bad Request 
-
-**A:** 预设界面 **推理强度** 选择 **自动**
-
----
-
-## 📁 项目结构
+## 项目结构
 
 ```
 CandyBox-Proxy/
@@ -326,37 +291,27 @@ CandyBox-Proxy/
 │   └── package.json
 ├── extension/        # 客户端扩展
 │   ├── index.js      # 扩展入口
-│   ├── style.css     # 样式
+│   ├── style.css
 │   └── manifest.json
+├── manifest.json     # 根 manifest（扩展直装用）
 ├── install.sh        # 一键安装脚本
-├── uninstall.sh      # 一键卸载脚本
-├── status.sh         # 状态检查脚本
+├── uninstall.sh      # 卸载脚本
 ├── setup.sh          # 本地安装脚本
-└── README.md
+└── status.sh         # 状态检查
 ```
 
 ---
 
-## 🙏 致谢
+## 致谢
 
 - [AIStudioBuildProxy](https://github.com/starowo/AIStudioBuildProxy) - 原始项目
 - [SillyTavern](https://github.com/SillyTavern/SillyTavern) - 酒馆本体
 
 ---
 
-## 📄 License
+**License:** MIT
 
-MIT License
+**作者:** WanWan ([@shleeshlee](https://github.com/shleeshlee))
 
----
-
-## 🍬 作者
-
-**WanWan**
-
-- GitHub: [@shleeshlee](https://github.com/shleeshlee)
-
----
-
-> 🍬 CandyBox Proxy - Sweet connection to your AI world  
-> ⚠️ 本项目免费开源，如果你是付费获取的，你被骗了！
+> 🍬 CandyBox Proxy - Sweet connection to your AI world
+> 本项目免费开源，如果你是付费获取的，你被骗了！
