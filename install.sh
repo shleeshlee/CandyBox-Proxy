@@ -6,8 +6,9 @@
 # 仓库: https://github.com/shleeshlee/CandyBox-Proxy
 # ============================================
 
-VERSION="1.0.3"
+VERSION="1.0.4"
 RELEASE_DATE="2026-03-27"
+INSTALL_SCRIPT_URL="https://raw.githubusercontent.com/shleeshlee/CandyBox-Proxy/main/install.sh"
 
 # 颜色定义
 RED='\033[0;31m'
@@ -104,6 +105,7 @@ log_error() { echo -e "${RED}[ERROR]${NC} $1"; }
 INSTALL_VERIFIED=false
 PORT_CONFLICT=false
 ST_PID=""
+ORIGINAL_ARGS=("$@")
 
 log_info "安装器版本: v${VERSION} (${RELEASE_DATE})"
 log_info "问题反馈请附上版本号，便于确认是否为最新安装脚本"
@@ -116,10 +118,70 @@ command_exists() {
     command -v "$1" >/dev/null 2>&1
 }
 
+download_file() {
+    local url="$1"
+    local output="$2"
+
+    if command_exists curl; then
+        curl -fsSL "$url" -o "$output"
+        return $?
+    fi
+
+    if command_exists wget; then
+        wget -qO "$output" "$url"
+        return $?
+    fi
+
+    return 1
+}
+
+self_update_installer() {
+    local current_script tmp_script
+
+    if [ "${CANDYBOX_INSTALLER_SELF_UPDATED:-0}" = "1" ]; then
+        return 0
+    fi
+
+    current_script="${BASH_SOURCE[0]:-}"
+    if [ -z "$current_script" ] || [ ! -r "$current_script" ]; then
+        return 0
+    fi
+
+    if ! command_exists curl && ! command_exists wget; then
+        return 0
+    fi
+
+    tmp_script=$(mktemp /tmp/candybox-install.XXXXXX.sh 2>/dev/null || true)
+    if [ -z "$tmp_script" ]; then
+        return 0
+    fi
+
+    if ! download_file "$INSTALL_SCRIPT_URL" "$tmp_script"; then
+        rm -f "$tmp_script"
+        return 0
+    fi
+
+    if cmp -s "$current_script" "$tmp_script"; then
+        rm -f "$tmp_script"
+        return 0
+    fi
+
+    chmod +x "$tmp_script"
+    echo ""
+    log_info "检测到更新的安装器版本，正在切换到 GitHub 最新版继续安装..."
+    echo ""
+    CANDYBOX_INSTALLER_SELF_UPDATED=1 bash "$tmp_script" "${ORIGINAL_ARGS[@]}"
+    local update_exit_code=$?
+    rm -f "$tmp_script"
+    exit "$update_exit_code"
+}
+
 get_abs_path() {
     local dir="$1"
     (cd "$dir" 2>/dev/null && pwd -P)
 }
+
+self_update_installer
 
 find_st_process_pid() {
     local target_dir
@@ -444,8 +506,14 @@ if command -v npm &> /dev/null; then
     fi
     log_success "依赖安装完成"
 else
-    log_warn "未检测到 npm，跳过依赖安装"
-    log_warn "请手动运行: cd $PLUGIN_INSTALL_DIR/server && npm install"
+    log_error "未检测到 npm，环境验证未通过，安装器不会继续执行"
+    echo ""
+    echo "这通常表示："
+    echo "  1. 当前运行的不是最新版安装器"
+    echo "  2. 自动安装依赖失败，但环境没有正确终止"
+    echo ""
+    echo "请重新使用 GitHub 一键安装命令执行；如果仍失败，请附上安装器版本号反馈。"
+    exit 1
 fi
 
 # ============================================
