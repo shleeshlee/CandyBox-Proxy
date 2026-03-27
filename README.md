@@ -14,13 +14,23 @@
 
 ### 方式一：一键安装（推荐）
 
-复制到终端运行，自动安装插件 + 扩展 + 启用 Server Plugins：
+复制到终端运行，自动检测酒馆目录、验证/补齐依赖、安装插件与扩展、启用 Server Plugins：
 
 ```bash
 curl -sL https://raw.githubusercontent.com/shleeshlee/CandyBox-Proxy/main/install.sh | bash
 ```
 
-> 安装完成后会检测酒馆是否在运行，可选自动重启
+> 如果检测到正在运行的 SillyTavern，会提示重启并在重启后做 CandyBox 健康检查  
+> 如果没在运行，会提示启动 SillyTavern；非交互环境不会强行帮你重启现有进程
+
+### 一键安装会做什么
+
+1. 检测 `SillyTavern` 目录，找不到就停止
+2. 验证 `git / node / npm` 和 `8811 / 9111` 端口状态
+3. 缺少依赖时尽量自动安装
+4. 安装 CandyBox 插件和前端扩展
+5. 自动设置 `config.yaml` 里的 `enableServerPlugins: true`
+6. 在重启/启动 SillyTavern 后检查 `http://127.0.0.1:8811/status`
 
 ---
 
@@ -125,6 +135,11 @@ curl -sL https://raw.githubusercontent.com/shleeshlee/CandyBox-Proxy/main/instal
 curl -sL https://raw.githubusercontent.com/shleeshlee/CandyBox-Proxy/main/install.sh | bash
 ```
 
+> 云端环境至少要满足：
+> - 已安装 `git`、`node`、`npm`（脚本会尽量自动补）
+> - `127.0.0.1:8811` 和 `127.0.0.1:9111` 没被别的服务占用
+> - 能正常启动 SillyTavern
+
 </details>
 
 <details>
@@ -154,14 +169,14 @@ curl -sL https://raw.githubusercontent.com/shleeshlee/CandyBox-Proxy/main/instal
 
 ## 使用方法
 
-### 1. 重启 SillyTavern
+### 1. 启动或重启 SillyTavern
 
 ```bash
 pkill -9 node
 cd ~/SillyTavern && node server.js
 ```
 
-> 安装脚本会自动提示重启，不重启插件不会生效
+> 安装脚本会尽量自动重启/启动并做健康检查；如果你是在非交互环境里安装，通常仍需要手动执行这一步
 
 ### 2. 打开 Applet
 
@@ -231,13 +246,28 @@ curl -sL https://raw.githubusercontent.com/shleeshlee/CandyBox-Proxy/main/status
 
 或访问 http://127.0.0.1:8811/status
 
+**Q: 一键安装显示完成，但 Applet 还是报 `1006`？**
+
+先检查这 4 件事：
+
+1. `curl -sL https://raw.githubusercontent.com/shleeshlee/CandyBox-Proxy/main/status.sh | bash`
+2. `git / node / npm` 是否都存在
+3. `8811` / `9111` 是否被其他程序占用
+4. `SillyTavern/config.yaml` 里是否是 `enableServerPlugins: true`
+
+常见根因：
+- SillyTavern 没有真正重启，CandyBox server plugin 还没加载
+- `9111` 被别的程序或 Docker 容器占用
+- `node` / `npm` 没装好，CandyBox 依赖没装成功
+- `8811` 虽然监听了，但不是 CandyBox 自己的响应
+
 **Q: 报错 400 Bad Request？**
 
 预设界面 → **推理强度** 选择 **自动**
 
 **Q: 连接错误 / 端口占用？**
 
-重启酒馆（`pkill -9 node` 后重新 `node server.js`）
+先跑状态检查脚本，看 `8811/9111` 是不是被别的程序占用；如果是旧 CandyBox 占用，重启 SillyTavern 即可。如果是其他服务占用，先释放端口再装。
 
 <details>
 <summary><b>MT 管理器查看/编辑酒馆文件</b></summary>
