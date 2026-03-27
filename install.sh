@@ -6,7 +6,7 @@
 # 仓库: https://github.com/shleeshlee/CandyBox-Proxy
 # ============================================
 
-VERSION="1.0.4"
+VERSION="1.0.5"
 RELEASE_DATE="2026-03-27"
 INSTALL_SCRIPT_URL="https://raw.githubusercontent.com/shleeshlee/CandyBox-Proxy/main/install.sh"
 
@@ -106,6 +106,9 @@ INSTALL_VERIFIED=false
 PORT_CONFLICT=false
 ST_PID=""
 ORIGINAL_ARGS=("$@")
+AUTO_INSTALL_METHOD="unknown"
+AUTO_INSTALL_LOG=""
+NPM_INSTALL_LOG=""
 
 log_info "安装器版本: v${VERSION} (${RELEASE_DATE})"
 log_info "问题反馈请附上版本号，便于确认是否为最新安装脚本"
@@ -133,6 +136,160 @@ download_file() {
     fi
 
     return 1
+}
+
+print_diagnostic_header() {
+    echo ""
+    echo -e "${RED}════════════════════════════════════════════════════════════════════${NC}"
+    echo -e "${RED}${BOLD}  安装失败原因${NC}"
+    echo -e "${RED}════════════════════════════════════════════════════════════════════${NC}"
+}
+
+print_resolution_hint() {
+    local title="$1"
+    shift
+    print_diagnostic_header
+    echo -e "${RED}[原因]${NC} $title"
+    while [ "$#" -gt 0 ]; do
+        echo "$1"
+        shift
+    done
+}
+
+detect_package_manager() {
+    if command_exists apt-get; then
+        echo "apt-get"
+        return 0
+    fi
+    if command_exists dnf; then
+        echo "dnf"
+        return 0
+    fi
+    if command_exists yum; then
+        echo "yum"
+        return 0
+    fi
+    if command_exists apk; then
+        echo "apk"
+        return 0
+    fi
+    if command_exists pacman; then
+        echo "pacman"
+        return 0
+    fi
+    if command_exists pkg; then
+        echo "pkg"
+        return 0
+    fi
+    if command_exists brew; then
+        echo "brew"
+        return 0
+    fi
+    if command_exists winget; then
+        echo "winget"
+        return 0
+    fi
+    if command_exists choco; then
+        echo "choco"
+        return 0
+    fi
+    echo "unknown"
+}
+
+show_port_owner() {
+    local port="$1"
+
+    if command_exists lsof; then
+        local owner
+        owner=$(lsof -nP -iTCP:"$port" -sTCP:LISTEN 2>/dev/null | sed -n '2p')
+        if [ -n "$owner" ]; then
+            echo "  - 端口 $port 当前占用: $owner"
+            return
+        fi
+    fi
+
+    if command_exists netstat; then
+        local owner
+        owner=$(netstat -tulnp 2>/dev/null | grep ":$port " | head -1)
+        if [ -n "$owner" ]; then
+            echo "  - 端口 $port 当前占用: $owner"
+        fi
+    fi
+}
+
+diagnose_auto_install_failure() {
+    local package_manager="$1"
+    shift
+    local missing_text="$*"
+
+    if [ "$package_manager" = "unknown" ]; then
+        print_resolution_hint "当前系统没有可识别的包管理器，CandyBox 无法自动补齐依赖。" \
+            "结果：安装器没法自动安装 ${missing_text}。" \
+            "处理：请先手动安装 git、node、npm，再重新执行安装脚本。"
+        return
+    fi
+
+    if [ "$(id -u)" -ne 0 ] && ! command_exists sudo; then
+        print_resolution_hint "当前账户没有 root 权限，且系统没有 sudo，CandyBox 无法自动安装依赖。" \
+            "结果：缺少的 ${missing_text} 无法补齐，安装会直接终止。" \
+            "处理：请使用 root 账户执行，或先手动安装 git、node、npm。"
+        return
+    fi
+
+    print_resolution_hint "自动安装依赖失败。" \
+        "结果：系统尝试通过 ${package_manager} 安装 ${missing_text}，但没有成功，所以 CandyBox 不会继续安装。" \
+        "常见原因：软件源不可用、网络无法访问包源、包管理器被锁住、或权限不足。" \
+        "处理：修复系统包管理后重试；若要反馈，请连同下面这段安装日志一起发出。"
+
+    if [ -n "$AUTO_INSTALL_LOG" ] && [ -f "$AUTO_INSTALL_LOG" ]; then
+        echo ""
+        echo "最近的依赖安装日志："
+        tail -n 20 "$AUTO_INSTALL_LOG"
+    fi
+}
+
+diagnose_missing_dependencies_after_install() {
+    local package_manager="$1"
+    shift
+    local missing_text="$*"
+
+    print_resolution_hint "自动安装命令已经执行，但系统里仍然找不到必要依赖。" \
+        "结果：CandyBox 仍然缺少 ${missing_text}，继续安装只会失败，因此已中止。" \
+        "常见原因：包管理器安装不完整、PATH 未生效、系统包拆分异常。" \
+        "处理：请先确认 ${package_manager} 是否真的装上了这些命令，再重新执行安装脚本。"
+}
+
+diagnose_git_clone_failure() {
+    print_resolution_hint "无法从 GitHub 下载 CandyBox 仓库。" \
+        "结果：安装器拿不到最新代码，CandyBox 不会继续安装。" \
+        "常见原因：GitHub 无法访问、DNS 异常、网络被墙、或 git HTTPS 被拦截。" \
+        "处理：先确认服务器能访问 github.com 和 raw.githubusercontent.com；不行就使用代理，或手动下载 ZIP。"
+}
+
+diagnose_npm_install_failure() {
+    local cause="npm 安装 CandyBox 依赖失败。"
+    local result="结果：CandyBox server plugin 缺少依赖，酒馆即使加载插件也无法正常启动。"
+    local action="处理：请根据下面日志判断是网络、权限还是 npm 自身异常。"
+
+    if [ -n "$NPM_INSTALL_LOG" ] && [ -f "$NPM_INSTALL_LOG" ]; then
+        if grep -Eqi 'EAI_AGAIN|ECONNRESET|ETIMEDOUT|network|ENOTFOUND' "$NPM_INSTALL_LOG"; then
+            cause="npm 无法连接依赖源。"
+            action="处理：服务器需要能访问 npm registry；修复网络或代理后重试。"
+        elif grep -Eqi 'EACCES|permission denied' "$NPM_INSTALL_LOG"; then
+            cause="npm 安装依赖时权限不足。"
+            action="处理：请检查插件目录权限，或使用有权限的账户重新安装。"
+        elif grep -Eqi 'No matching version found|notarget' "$NPM_INSTALL_LOG"; then
+            cause="npm 依赖版本无法解析。"
+            action="处理：请反馈完整日志；这通常表示 registry 异常或依赖版本解析失败。"
+        fi
+    fi
+
+    print_resolution_hint "$cause" "$result" "$action"
+    if [ -n "$NPM_INSTALL_LOG" ] && [ -f "$NPM_INSTALL_LOG" ]; then
+        echo ""
+        echo "最近的 npm 日志："
+        tail -n 20 "$NPM_INSTALL_LOG"
+    fi
 }
 
 self_update_installer() {
@@ -260,52 +417,61 @@ run_with_privilege() {
 }
 
 auto_install_dependencies() {
+    local package_manager
+    package_manager=$(detect_package_manager)
+    AUTO_INSTALL_METHOD="$package_manager"
+    AUTO_INSTALL_LOG=$(mktemp /tmp/candybox-auto-install.XXXXXX.log 2>/dev/null || true)
+    if [ -z "$AUTO_INSTALL_LOG" ]; then
+        AUTO_INSTALL_LOG="/tmp/candybox-auto-install.log"
+        : >"$AUTO_INSTALL_LOG" 2>/dev/null || true
+    fi
+
     log_info "检测到缺少依赖，正在尝试自动安装..."
 
-    if command_exists apt-get; then
-        run_with_privilege apt-get update
-        run_with_privilege apt-get install -y git nodejs npm
+    if [ "$package_manager" = "apt-get" ]; then
+        run_with_privilege apt-get update >>"$AUTO_INSTALL_LOG" 2>&1
+        run_with_privilege apt-get install -y git nodejs npm >>"$AUTO_INSTALL_LOG" 2>&1
         return $?
     fi
 
-    if command_exists dnf; then
-        run_with_privilege dnf install -y git nodejs npm
+    if [ "$package_manager" = "dnf" ]; then
+        run_with_privilege dnf install -y git nodejs npm >>"$AUTO_INSTALL_LOG" 2>&1
         return $?
     fi
 
-    if command_exists yum; then
-        run_with_privilege yum install -y git nodejs npm
+    if [ "$package_manager" = "yum" ]; then
+        run_with_privilege yum install -y git nodejs npm >>"$AUTO_INSTALL_LOG" 2>&1
         return $?
     fi
 
-    if command_exists apk; then
-        run_with_privilege apk add --no-cache git nodejs npm
+    if [ "$package_manager" = "apk" ]; then
+        run_with_privilege apk add --no-cache git nodejs npm >>"$AUTO_INSTALL_LOG" 2>&1
         return $?
     fi
 
-    if command_exists pacman; then
-        run_with_privilege pacman -Sy --noconfirm git nodejs npm
+    if [ "$package_manager" = "pacman" ]; then
+        run_with_privilege pacman -Sy --noconfirm git nodejs npm >>"$AUTO_INSTALL_LOG" 2>&1
         return $?
     fi
 
-    if command_exists pkg; then
-        pkg update -y
-        pkg install -y git nodejs
+    if [ "$package_manager" = "pkg" ]; then
+        pkg update -y >>"$AUTO_INSTALL_LOG" 2>&1
+        pkg install -y git nodejs >>"$AUTO_INSTALL_LOG" 2>&1
         return $?
     fi
 
-    if command_exists brew; then
-        brew install git node
+    if [ "$package_manager" = "brew" ]; then
+        brew install git node >>"$AUTO_INSTALL_LOG" 2>&1
         return $?
     fi
 
-    if command_exists winget; then
-        winget install --accept-package-agreements --accept-source-agreements Git.Git OpenJS.NodeJS.LTS
+    if [ "$package_manager" = "winget" ]; then
+        winget install --accept-package-agreements --accept-source-agreements Git.Git OpenJS.NodeJS.LTS >>"$AUTO_INSTALL_LOG" 2>&1
         return $?
     fi
 
-    if command_exists choco; then
-        choco install -y git nodejs-lts
+    if [ "$package_manager" = "choco" ]; then
+        choco install -y git nodejs-lts >>"$AUTO_INSTALL_LOG" 2>&1
         return $?
     fi
 
@@ -329,13 +495,7 @@ validate_environment() {
         log_warn "缺少依赖: ${missing_cmds[*]}"
         if ! auto_install_dependencies; then
             log_error "自动安装依赖失败"
-            echo ""
-            echo "CandyBox 依赖以下环境："
-            echo "  - git：下载插件仓库"
-            echo "  - node：运行 SillyTavern / CandyBox server plugin"
-            echo "  - npm：安装 CandyBox 依赖"
-            echo ""
-            echo "请先手动安装上述依赖后再重新执行安装脚本。"
+            diagnose_auto_install_failure "$AUTO_INSTALL_METHOD" "${missing_cmds[@]}"
             exit 1
         fi
     fi
@@ -348,8 +508,7 @@ validate_environment() {
     done
 
     if [ "$missing_after_install" -ne 0 ]; then
-        echo ""
-        echo "自动安装后依然缺少必要依赖，请手动补齐后重试。"
+        diagnose_missing_dependencies_after_install "$AUTO_INSTALL_METHOD" "${missing_cmds[@]}"
         exit 1
     fi
 
@@ -368,7 +527,11 @@ validate_environment() {
             log_warn "检测到 CandyBox 端口已被占用；如果是当前酒馆里的旧 CandyBox，重启后会再次验收"
         else
             log_error "检测到 CandyBox 所需端口被占用，且当前未发现目标 SillyTavern 在运行"
-            echo "请先释放 8811/9111 后再安装。"
+            print_resolution_hint "CandyBox 所需端口已被其他程序占用。" \
+                "结果：CandyBox 无法监听 8811/9111，所以安装即使继续，Applet 最终也会报连接失败。" \
+                "处理：先释放 8811/9111，再重新安装。"
+            show_port_owner 8811
+            show_port_owner 9111
             exit 1
         fi
     else
@@ -472,11 +635,7 @@ ROLLBACK_PLUGIN_DIR="$PLUGIN_INSTALL_DIR"
 
 if ! git clone --depth 1 https://github.com/shleeshlee/CandyBox-Proxy.git CandyBox 2>/dev/null; then
     log_error "下载失败！请检查网络连接。"
-    echo ""
-    echo "如果无法访问 GitHub，可以尝试："
-    echo "1. 使用代理"
-    echo "2. 手动下载 ZIP 并解压到 $PLUGINS_DIR/CandyBox"
-    echo ""
+    diagnose_git_clone_failure
     exit 1
 fi
 
@@ -500,8 +659,14 @@ fi
 log_info "正在安装依赖..."
 
 if command -v npm &> /dev/null; then
-    if ! (cd "$PLUGIN_INSTALL_DIR/server" && npm install --silent); then
+    NPM_INSTALL_LOG=$(mktemp /tmp/candybox-npm-install.XXXXXX.log 2>/dev/null || true)
+    if [ -z "$NPM_INSTALL_LOG" ]; then
+        NPM_INSTALL_LOG="/tmp/candybox-npm-install.log"
+        : >"$NPM_INSTALL_LOG" 2>/dev/null || true
+    fi
+    if ! (cd "$PLUGIN_INSTALL_DIR/server" && npm install --silent >>"$NPM_INSTALL_LOG" 2>&1); then
         log_error "依赖安装失败，CandyBox 无法启动"
+        diagnose_npm_install_failure
         exit 1
     fi
     log_success "依赖安装完成"
