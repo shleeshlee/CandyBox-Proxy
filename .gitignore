@@ -137,4 +137,8 @@ dist
 # Vite logs files
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+# Local operator docs
+AGENTS.md
 CLAUDE.md
+HANDOVER.md
