@@ -6,8 +6,8 @@
 # 仓库: https://github.com/shleeshlee/CandyBox-Proxy
 # ============================================
 
-VERSION="1.0.5"
-RELEASE_DATE="2026-03-27"
+VERSION="1.0.6"
+RELEASE_DATE="2026-03-29"
 INSTALL_SCRIPT_URL="https://raw.githubusercontent.com/shleeshlee/CandyBox-Proxy/main/install.sh"
 
 # 颜色定义
@@ -18,6 +18,10 @@ CYAN='\033[0;36m'
 MAGENTA='\033[0;35m'
 BOLD='\033[1m'
 NC='\033[0m'
+
+# 临时目录（兼容 Termux）
+_TMPBASE="${TMPDIR:-${PREFIX:+$PREFIX/tmp}}"
+_TMPBASE="${_TMPBASE:-/tmp}"
 
 # 回滚标记
 PLUGIN_INSTALLED=false
@@ -308,7 +312,7 @@ self_update_installer() {
         return 0
     fi
 
-    tmp_script=$(mktemp /tmp/candybox-install.XXXXXX.sh 2>/dev/null || true)
+    tmp_script=$(mktemp "$_TMPBASE/candybox-install.XXXXXX.sh" 2>/dev/null || true)
     if [ -z "$tmp_script" ]; then
         return 0
     fi
@@ -420,9 +424,9 @@ auto_install_dependencies() {
     local package_manager
     package_manager=$(detect_package_manager)
     AUTO_INSTALL_METHOD="$package_manager"
-    AUTO_INSTALL_LOG=$(mktemp /tmp/candybox-auto-install.XXXXXX.log 2>/dev/null || true)
+    AUTO_INSTALL_LOG=$(mktemp "$_TMPBASE/candybox-auto-install.XXXXXX.log" 2>/dev/null || true)
     if [ -z "$AUTO_INSTALL_LOG" ]; then
-        AUTO_INSTALL_LOG="/tmp/candybox-auto-install.log"
+        AUTO_INSTALL_LOG="$_TMPBASE/candybox-auto-install.log"
         : >"$AUTO_INSTALL_LOG" 2>/dev/null || true
     fi
 
@@ -659,9 +663,9 @@ fi
 log_info "正在安装依赖..."
 
 if command -v npm &> /dev/null; then
-    NPM_INSTALL_LOG=$(mktemp /tmp/candybox-npm-install.XXXXXX.log 2>/dev/null || true)
+    NPM_INSTALL_LOG=$(mktemp "$_TMPBASE/candybox-npm-install.XXXXXX.log" 2>/dev/null || true)
     if [ -z "$NPM_INSTALL_LOG" ]; then
-        NPM_INSTALL_LOG="/tmp/candybox-npm-install.log"
+        NPM_INSTALL_LOG="$_TMPBASE/candybox-npm-install.log"
         : >"$NPM_INSTALL_LOG" 2>/dev/null || true
     fi
     if ! (cd "$PLUGIN_INSTALL_DIR/server" && npm install --silent >>"$NPM_INSTALL_LOG" 2>&1); then
