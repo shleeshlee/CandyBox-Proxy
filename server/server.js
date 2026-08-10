@@ -1,7 +1,7 @@
 /**
  * 🍬 CandyBox Proxy - Server
  * 
- * 版本: 1.3.0
+ * 版本: 1.3.1
  * 作者: WanWan
  * 端口: HTTP 8811 / WebSocket 9111
  * 仓库: https://github.com/shleeshlee/CandyBox-Proxy
@@ -208,7 +208,7 @@ class ProxyServer extends EventEmitter {
       
       console.log('');
       console.log('🍬 ═══════════════════════════════════════════');
-      console.log('🍬  CandyBox Proxy v1.3.0');
+      console.log('🍬  CandyBox Proxy v1.3.1');
       console.log('🍬  作者: WanWan');
       console.log('🍬 ═══════════════════════════════════════════');
       console.log(`🍬  HTTP:      http://${this.config.HOST}:${this.config.HTTP_PORT}`);
@@ -237,7 +237,7 @@ class ProxyServer extends EventEmitter {
     app.get('/status', (req, res) => {
       res.json({
         name: 'CandyBox Proxy',
-        version: '1.3.0',
+        version: '1.3.1',
         status: 'running',
         browser_connected: this.connections.isConnected,
         timestamp: new Date().toISOString(),
