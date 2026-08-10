@@ -18,6 +18,8 @@ const EXTENSION_NAME = 'CandyBox';
 // ============================================
 const CONFIG = {
   // Applet 地址 - 替换为你自己的
+  // ⚠️ 默认是公共 Remix 拷贝页：2026-08 Google 改版后，公共链接无法直接当代理页用，
+  // 首次使用请在打开的页面点 Remix 拷贝一份到自己账号，再把自己副本的链接替换到这里（见 README）
   APPLET_URL: 'https://ai.studio/apps/09f6ee61-3e9e-4123-8d22-b1b473593d82',
   
   // 代理设置

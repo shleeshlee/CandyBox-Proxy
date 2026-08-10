@@ -178,11 +178,20 @@ cd ~/SillyTavern && node server.js
 
 > 安装脚本会尽量自动重启/启动并做健康检查；如果你是在非交互环境里安装，通常仍需要手动执行这一步
 
-### 2. 打开 Applet
+### 2. 创建并打开自己的 Applet
 
-在酒馆扩展面板点击 **CandyBox Proxy** 按钮，自动打开 Applet
+> ⚠️ 2026-08 Google AI Studio 改版后，公共 Applet 链接无法直接当代理页使用（打开只有 Remix 拷贝页）。**每个用户需要把 Applet 拷贝一份到自己的 Google 账号**，一次性操作：
 
-> 需要先登录 Google 账号
+1. 登录 Google 账号，打开 [CandyBox Applet](https://ai.studio/apps/09f6ee61-3e9e-4123-8d22-b1b473593d82?fullscreenApplet=true)
+2. 点击 **Remix**，把 app 复制一份到自己的账号
+3. 复制自己副本的链接（编辑器地址栏 `.../apps/drive/...` 形态），替换扩展配置中的 APPLET_URL：
+
+```bash
+nano ~/SillyTavern/plugins/CandyBox/extension/index.js
+# 或者编辑 data/default-user/extensions/CandyBox-Proxy/extension/index.js（直装路径）
+```
+
+之后在酒馆扩展面板点击 **CandyBox Proxy** 按钮，自动打开你自己的 Applet
 
 ### 3. 启动服务
 
@@ -196,20 +205,6 @@ cd ~/SillyTavern && node server.js
 4. 开始聊天
 
 ---
-
-## 高级选项：创建自己的 Applet
-
-默认使用公共 Applet 链接。如果你想用自己的：
-
-1. 打开 [CandyBox Applet](https://ai.studio/apps/09f6ee61-3e9e-4123-8d22-b1b473593d82?fullscreenApplet=true)
-2. 点击 **Remix**，把 app 复制一份到自己的 Google 账号
-3. 在自己的副本编辑器里打开 **Share** 面板：General access 设为 **Public: Anyone with the link can view**，并开启 **Default to fullscreen**
-4. 点 **Copy link** 复制链接（去掉末尾的 `?fullscreenApplet=true` 参数，扩展会自动追加），替换扩展配置中的 APPLET_URL：
-
-```bash
-nano ~/SillyTavern/plugins/CandyBox/extension/index.js
-# 或者编辑 data/default-user/extensions/CandyBox-Proxy/extension/index.js（直装路径）
-```
 
 ---
 
