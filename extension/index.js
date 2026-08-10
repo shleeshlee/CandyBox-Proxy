@@ -1,7 +1,7 @@
 /**
  * 🍬 CandyBox Proxy - SillyTavern Extension
  * 
- * 版本: 1.3.0
+ * 版本: 1.3.1
  * 功能: 一键打开 Applet + 多账号名册下拉栏
  * 作者: WanWan
  * 仓库: https://github.com/shleeshlee/CandyBox-Proxy
@@ -12,7 +12,7 @@
 import { extension_settings, getContext } from '../../../extensions.js';
 
 const EXTENSION_NAME = 'CandyBox';
-const VERSION = '1.3.0';
+const VERSION = '1.3.1';
 
 // ============================================
 // 配置
@@ -189,12 +189,15 @@ function createUI() {
     }
     #cb_dd_toggle {
       cursor: pointer;
-      font-size: 11px;
-      opacity: 0.8;
-      padding: 3px 10px;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 6px;
+      background: rgba(107, 114, 128, 0.25);
       user-select: none;
+      margin: 3px 0 1px;
     }
-    #cb_dd_toggle:hover { opacity: 1; }
+    #cb_dd_toggle:hover { background: rgba(107, 114, 128, 0.4); }
     .cb-dd-item {
       cursor: pointer;
       display: flex;
@@ -227,8 +230,8 @@ function createUI() {
         </div>
         <div class="fa-solid fa-chevron-right" style="opacity: 0.7; font-size: 10px;"></div>
       </div>
-      <div id="cb_dd_toggle">▸ 账号名册</div>
-      <div id="cb_dd_list" style="display: none;">
+      <div id="cb_dd_toggle">▾ 账号名册</div>
+      <div id="cb_dd_list">
         <div class="cb-dd-item" id="cb_switch_google">
           <span>🔄 切换 Google 账号</span>
         </div>
@@ -241,7 +244,7 @@ function createUI() {
             placeholder="该账号 Remix 出的 Applet 链接（aistudio.google.com/apps/...）"
             style="width: 100%; font-size: 11px; box-sizing: border-box; margin-top: 3px;">
           <div style="display: flex; gap: 6px; margin-top: 4px; align-items: center;">
-            <div id="cb_save_url" class="menu_button" style="font-size: 11px; padding: 2px 12px; margin: 0;">添加 / 更新</div>
+            <div id="cb_save_url" class="menu_button" style="font-size: 11px; padding: 2px 12px; margin: 0; white-space: nowrap; width: auto;">添加 / 更新</div>
             <span id="cb_url_status" style="font-size: 11px; opacity: 0.75;"></span>
           </div>
         </div>
