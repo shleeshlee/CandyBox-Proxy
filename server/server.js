@@ -13,6 +13,8 @@
 const express = require('express');
 const WebSocket = require('ws');
 const http = require('http');
+const fs = require('fs');
+const path = require('path');
 const { EventEmitter } = require('events');
 
 // ============================================
@@ -244,6 +246,32 @@ class ProxyServer extends EventEmitter {
     // 拦截酒馆健康检查（/accounts 不存在于 Gemini API）
     app.get('/accounts', (req, res) => {
       res.json({ accounts: [{ id: 'candybox', name: 'CandyBox Proxy' }] });
+    });
+
+    // 用户自己的 Applet 副本链接
+    // 2026-08 Google AI Studio 改版后公共链接无法直接使用，每个用户 Remix 一份，
+    // 在酒馆扩展面板粘贴一次自己的链接，保存在这里，以后一键直达
+    const APPLET_URL_FILE = path.join(__dirname, 'applet-url.json');
+    app.get('/applet-url', (req, res) => {
+      res.set('Access-Control-Allow-Origin', '*');
+      try {
+        res.json(JSON.parse(fs.readFileSync(APPLET_URL_FILE, 'utf8')));
+      } catch {
+        res.json({ url: null });
+      }
+    });
+    app.post('/applet-url', (req, res) => {
+      res.set('Access-Control-Allow-Origin', '*');
+      let body = req.body;
+      if (Buffer.isBuffer(body)) body = body.toString('utf8');
+      if (typeof body === 'string') { try { body = JSON.parse(body); } catch { body = {}; } }
+      const url = body?.url;
+      if (!url || !/^https:\/\/(aistudio\.google\.com|ai\.studio)\/apps\//.test(url)) {
+        return res.status(400).json({ error: '需要 aistudio.google.com 或 ai.studio 的 Applet 链接' });
+      }
+      fs.writeFileSync(APPLET_URL_FILE, JSON.stringify({ url }, null, 2));
+      log.info(`🍬 已保存用户 Applet 链接: ${url}`);
+      res.json({ ok: true, url });
     });
 
     // 代理所有其他请求

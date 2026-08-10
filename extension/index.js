@@ -17,11 +17,10 @@ const EXTENSION_NAME = 'CandyBox';
 // 配置
 // ============================================
 const CONFIG = {
-  // Applet 地址 - 替换为你自己的
-  // ⚠️ 默认是公共 Remix 拷贝页：2026-08 Google 改版后，公共链接无法直接当代理页用，
-  // 首次使用请在打开的页面点 Remix 拷贝一份到自己账号，再把自己副本的链接替换到这里（见 README）
-  APPLET_URL: 'https://ai.studio/apps/09f6ee61-3e9e-4123-8d22-b1b473593d82',
-  
+  // 公共 Remix 拷贝页：2026-08 Google 改版后公共链接无法直接当代理页用，
+  // 首次使用会打开它引导用户点 Remix 拷贝一份，之后用面板里保存的用户自己的链接
+  REMIX_URL: 'https://ai.studio/apps/09f6ee61-3e9e-4123-8d22-b1b473593d82',
+
   // 代理设置
   PROXY_URL: 'http://127.0.0.1:8811',
   PROXY_NAME: 'CandyBox',
@@ -35,19 +34,50 @@ let state = {
 };
 
 // ============================================
+// 用户自己的 Applet 链接（保存在本地 server，粘贴一次永久生效）
+// ============================================
+async function getSavedAppletUrl() {
+  try {
+    const r = await fetch(`${CONFIG.PROXY_URL}/applet-url`);
+    const j = await r.json();
+    return j.url || null;
+  } catch {
+    return null;
+  }
+}
+
+async function saveAppletUrl(url) {
+  // text/plain 避免 CORS 预检（服务端会自己解析）
+  const r = await fetch(`${CONFIG.PROXY_URL}/applet-url`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain' },
+    body: JSON.stringify({ url }),
+  });
+  return r.ok;
+}
+
+// ============================================
 // 打开 Applet
 // ============================================
-function openApplet() {
+async function openApplet() {
   if (state.appletWindow && !state.appletWindow.closed) {
     state.appletWindow.focus();
     return;
   }
 
+  const saved = await getSavedAppletUrl();
+  let url;
+  if (saved) {
+    url = saved.includes('fullscreenApplet')
+      ? saved
+      : `${saved}${saved.includes('?') ? '&' : '?'}fullscreenApplet=true`;
+  } else {
+    // 还没配置：打开公共 Remix 页引导拷贝
+    url = CONFIG.REMIX_URL;
+    $('#cb_url_status').text('👆 在打开的页面点 Remix 拷贝，然后把新页面的链接粘到下面');
+  }
+
   const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-  const url = CONFIG.APPLET_URL.includes('?') 
-    ? `${CONFIG.APPLET_URL}&fullscreenApplet=true`
-    : `${CONFIG.APPLET_URL}?fullscreenApplet=true`;
-  
   if (isMobile) {
     state.appletWindow = window.open(url, '_blank');
   } else {
@@ -145,16 +175,50 @@ function createUI() {
         </div>
         <div class="fa-solid fa-chevron-right" style="opacity: 0.7; font-size: 10px;"></div>
       </div>
+      <div id="cb_setup" style="margin: 4px 0 2px;">
+        <input id="cb_applet_url" class="text_pole" type="text"
+          placeholder="首次使用：点上方按钮 → 点 Remix 拷贝 → 把你的链接粘到这里"
+          style="width: 100%; font-size: 11px; box-sizing: border-box;">
+        <div style="display: flex; gap: 6px; margin-top: 4px; align-items: center;">
+          <div id="cb_save_url" class="menu_button" style="font-size: 11px; padding: 2px 12px; margin: 0;">保存链接</div>
+          <span id="cb_url_status" style="font-size: 11px; opacity: 0.75;"></span>
+        </div>
+      </div>
     </div>
   `;
 
   $('#extensions_settings2').append(html);
+
+  // 显示已保存的链接
+  getSavedAppletUrl().then((saved) => {
+    if (saved) {
+      $('#cb_applet_url').val(saved);
+      $('#cb_url_status').text('✓ 已配置，点上方按钮直达');
+    }
+  });
 
   // 点击打开 Applet
   $(document).on('click', '#cb_panel', (e) => {
     e.preventDefault();
     e.stopPropagation();
     openApplet();
+  });
+
+  // 保存用户自己的 Applet 链接
+  $(document).on('click', '#cb_save_url', async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const url = String($('#cb_applet_url').val() || '').trim();
+    if (!/^https:\/\/(aistudio\.google\.com|ai\.studio)\/apps\//.test(url)) {
+      $('#cb_url_status').text('✗ 链接不对，要 aistudio.google.com/apps/... 形态');
+      return;
+    }
+    try {
+      const ok = await saveAppletUrl(url);
+      $('#cb_url_status').text(ok ? '✓ 已保存，以后点上方按钮直达你的 Applet' : '✗ 保存失败，服务端未运行？');
+    } catch {
+      $('#cb_url_status').text('✗ 保存失败，CandyBox 服务没启动？');
+    }
   });
 }
 
