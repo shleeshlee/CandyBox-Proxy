@@ -201,10 +201,10 @@ cd ~/SillyTavern && node server.js
 
 默认使用公共 Applet 链接。如果你想用自己的：
 
-1. 打开 [CandyBox Applet](https://ai.studio/apps/drive/1Q4aqGJNnOzPWh0r1ZpZASoNdojqUkWTk?fullscreenApplet=true)
-2. 点击右上角退出全屏 → 右下角 `...` → **Copy app**
-3. 打开副本 → **Share app** → 开启 **Publish your app**
-4. 复制链接，替换扩展配置中的 APPLET_URL：
+1. 打开 [CandyBox Applet](https://ai.studio/apps/09f6ee61-3e9e-4123-8d22-b1b473593d82?fullscreenApplet=true)
+2. 点击 **Remix**，把 app 复制一份到自己的 Google 账号
+3. 在自己的副本编辑器里打开 **Share** 面板：General access 设为 **Public: Anyone with the link can view**，并开启 **Default to fullscreen**
+4. 点 **Copy link** 复制链接（去掉末尾的 `?fullscreenApplet=true` 参数，扩展会自动追加），替换扩展配置中的 APPLET_URL：
 
 ```bash
 nano ~/SillyTavern/plugins/CandyBox/extension/index.js
