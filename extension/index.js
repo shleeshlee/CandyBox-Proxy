@@ -17,14 +17,22 @@ const EXTENSION_NAME = 'CandyBox';
 // 配置
 // ============================================
 const CONFIG = {
-  // 公共 Remix 拷贝页：2026-08 Google 改版后公共链接无法直接当代理页用，
-  // 首次使用会打开它引导用户点 Remix 拷贝一份，之后用面板里保存的用户自己的链接
-  REMIX_URL: 'https://ai.studio/apps/09f6ee61-3e9e-4123-8d22-b1b473593d82',
+  // 公共 Applet 链接。2026-08 Google 改版后必须带 showAssistant+showPreview 参数打开，
+  // 否则会落在无法交互的 Remix 页（withAppletParams 统一追加）
+  APPLET_URL: 'https://ai.studio/apps/09f6ee61-3e9e-4123-8d22-b1b473593d82',
 
   // 代理设置
   PROXY_URL: 'http://127.0.0.1:8811',
   PROXY_NAME: 'CandyBox',
 };
+
+// 2026-08 改版后直接渲染 app 本体所必需的打开参数
+function withAppletParams(u) {
+  const parts = ['fullscreenApplet=true', 'showAssistant=true', 'showPreview=true']
+    .filter((p) => !u.includes(p.split('=')[0]));
+  if (!parts.length) return u;
+  return `${u}${u.includes('?') ? '&' : '?'}${parts.join('&')}`;
+}
 
 // ============================================
 // 状态
@@ -66,16 +74,7 @@ async function openApplet() {
   }
 
   const saved = await getSavedAppletUrl();
-  let url;
-  if (saved) {
-    url = saved.includes('fullscreenApplet')
-      ? saved
-      : `${saved}${saved.includes('?') ? '&' : '?'}fullscreenApplet=true`;
-  } else {
-    // 还没配置：打开公共 Remix 页引导拷贝
-    url = CONFIG.REMIX_URL;
-    $('#cb_url_status').text('👆 在打开的页面点 Remix 拷贝，然后把新页面的链接粘到下面');
-  }
+  const url = withAppletParams(saved || CONFIG.APPLET_URL);
 
   const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
   if (isMobile) {
@@ -177,7 +176,7 @@ function createUI() {
       </div>
       <div id="cb_setup" style="margin: 4px 0 2px;">
         <input id="cb_applet_url" class="text_pole" type="text"
-          placeholder="首次使用：点上方按钮 → 点 Remix 拷贝 → 把你的链接粘到这里"
+          placeholder="可选：想用自己的 Applet 副本？点 Remix 拷贝后把链接粘到这里"
           style="width: 100%; font-size: 11px; box-sizing: border-box;">
         <div style="display: flex; gap: 6px; margin-top: 4px; align-items: center;">
           <div id="cb_save_url" class="menu_button" style="font-size: 11px; padding: 2px 12px; margin: 0;">保存链接</div>
@@ -193,7 +192,7 @@ function createUI() {
   getSavedAppletUrl().then((saved) => {
     if (saved) {
       $('#cb_applet_url').val(saved);
-      $('#cb_url_status').text('✓ 已配置，点上方按钮直达');
+      $('#cb_url_status').text('✓ 使用你自己的 Applet 副本');
     }
   });
 
