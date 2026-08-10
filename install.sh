@@ -6,8 +6,8 @@
 # 仓库: https://github.com/shleeshlee/CandyBox-Proxy
 # ============================================
 
-VERSION="1.0.6"
-RELEASE_DATE="2026-03-29"
+VERSION="1.1.0"
+RELEASE_DATE="2026-08-10"
 INSTALL_SCRIPT_URL="https://raw.githubusercontent.com/shleeshlee/CandyBox-Proxy/main/install.sh"
 
 # 颜色定义
@@ -19,7 +19,9 @@ MAGENTA='\033[0;35m'
 BOLD='\033[1m'
 NC='\033[0m'
 
-# 临时目录（兼容 Termux）
+# 临时目录：优先 $TMPDIR → $PREFIX/tmp → /tmp 兜底
+# 原因：Termux 没有系统级 /tmp，硬编码 /tmp 会让 mktemp 和 npm install 日志路径一起失效。
+# 必须先尝试 $TMPDIR（Termux 默认设置）或 $PREFIX/tmp（Termux 的 prefix 路径）。
 _TMPBASE="${TMPDIR:-${PREFIX:+$PREFIX/tmp}}"
 _TMPBASE="${_TMPBASE:-/tmp}"
 
@@ -623,6 +625,11 @@ EXT_INSTALL_DIR="$EXT_DIR/CandyBox"
 
 if [ -d "$PLUGIN_INSTALL_DIR" ] || [ -d "$EXT_INSTALL_DIR" ]; then
     log_warn "检测到已安装，正在更新..."
+    # 更新前保留用户配置（applet 链接等），装完恢复
+    _CFG_BACKUP=$(mktemp -d "$_TMPBASE/candybox-cfg.XXXXXX" 2>/dev/null || echo "")
+    if [ -n "$_CFG_BACKUP" ] && [ -f "$PLUGIN_INSTALL_DIR/server/applet-url.json" ]; then
+        cp "$PLUGIN_INSTALL_DIR/server/applet-url.json" "$_CFG_BACKUP/" 2>/dev/null || true
+    fi
     rm -rf "$PLUGIN_INSTALL_DIR"
     rm -rf "$EXT_INSTALL_DIR"
 fi
@@ -649,6 +656,12 @@ log_success "下载完成"
 # 复制入口文件到插件根目录（SillyTavern 要求）
 cp "$PLUGINS_DIR/CandyBox/server/package.json" "$PLUGINS_DIR/CandyBox/"
 cp "$PLUGINS_DIR/CandyBox/server/index.js" "$PLUGINS_DIR/CandyBox/"
+
+# 恢复更新前保留的用户配置
+if [ -n "${_CFG_BACKUP:-}" ] && [ -f "$_CFG_BACKUP/applet-url.json" ]; then
+    cp "$_CFG_BACKUP/applet-url.json" "$PLUGIN_INSTALL_DIR/server/" && log_info "已保留你的 Applet 链接配置"
+    rm -rf "$_CFG_BACKUP"
+fi
 # 修复模块引用路径
 if [[ "$OSTYPE" == "darwin"* ]]; then
     sed -i '' "s|require('./server')|require('./server/server')|g" "$PLUGINS_DIR/CandyBox/index.js"
