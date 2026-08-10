@@ -68,20 +68,12 @@ async function saveAppletUrl(url) {
 // 打开 Applet
 // ============================================
 async function openApplet() {
-  if (state.appletWindow && !state.appletWindow.closed) {
-    state.appletWindow.focus();
-    return;
-  }
-
   const saved = await getSavedAppletUrl();
   const url = withAppletParams(saved || CONFIG.APPLET_URL);
 
-  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-  if (isMobile) {
-    state.appletWindow = window.open(url, '_blank');
-  } else {
-    state.appletWindow = window.open(url, 'candybox-applet', 'width=500,height=700');
-  }
+  // 必须以 noopener,noreferrer 开完整新标签页：带来源信息(referrer/opener)跳转时
+  // AI Studio 会把页面丢进无法交互的 Remix 壳，只有"等价于直接输入地址"的打开方式能进 app(2026-08-10 实测)
+  window.open(url, '_blank', 'noopener,noreferrer');
 }
 
 // ============================================
