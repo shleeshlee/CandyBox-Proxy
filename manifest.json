@@ -7,6 +7,6 @@
   "js": "extension/index.js",
   "css": "extension/style.css",
   "author": "shleeshlee",
-  "version": "1.0.2",
+  "version": "1.3.0",
   "auto_update": true
 }

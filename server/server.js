@@ -1,7 +1,7 @@
 /**
  * 🍬 CandyBox Proxy - Server
  * 
- * 版本: 1.2.0
+ * 版本: 1.3.0
  * 作者: WanWan
  * 端口: HTTP 8811 / WebSocket 9111
  * 仓库: https://github.com/shleeshlee/CandyBox-Proxy
@@ -208,7 +208,7 @@ class ProxyServer extends EventEmitter {
       
       console.log('');
       console.log('🍬 ═══════════════════════════════════════════');
-      console.log('🍬  CandyBox Proxy v1.2.0');
+      console.log('🍬  CandyBox Proxy v1.3.0');
       console.log('🍬  作者: WanWan');
       console.log('🍬 ═══════════════════════════════════════════');
       console.log(`🍬  HTTP:      http://${this.config.HOST}:${this.config.HTTP_PORT}`);
@@ -237,7 +237,7 @@ class ProxyServer extends EventEmitter {
     app.get('/status', (req, res) => {
       res.json({
         name: 'CandyBox Proxy',
-        version: '1.2.0',
+        version: '1.3.0',
         status: 'running',
         browser_connected: this.connections.isConnected,
         timestamp: new Date().toISOString(),
@@ -249,30 +249,104 @@ class ProxyServer extends EventEmitter {
       res.json({ accounts: [{ id: 'candybox', name: 'CandyBox Proxy' }] });
     });
 
-    // 用户自己的 Applet 副本链接
-    // 2026-08 Google AI Studio 改版后公共链接无法直接使用，每个用户 Remix 一份，
-    // 在酒馆扩展面板粘贴一次自己的链接，保存在这里，以后一键直达
+    // 用户自己的 Applet 副本链接 —— v1.3.0 起是多账号名册
+    // AI Studio 只让 applet 的主人号直进（非主人撞 Remix 墙），所以多账号 = 一号一链接：
+    // 每个 Google 账号 Remix 一份 applet，各自链接存进名册，酒馆下拉栏点名字直达。
+    // 文件仍是 applet-url.json：{ list: [{name, url}], active, url }，
+    // 其中 url 字段永远镜像 active 那条，旧版扩展的 GET /applet-url 不受影响。
     const APPLET_URL_FILE = path.join(__dirname, 'applet-url.json');
-    app.get('/applet-url', (req, res) => {
-      res.set('Access-Control-Allow-Origin', '*');
-      try {
-        res.json(JSON.parse(fs.readFileSync(APPLET_URL_FILE, 'utf8')));
-      } catch {
-        res.json({ url: null });
+    const APPLET_URL_RE = /^https:\/\/(aistudio\.google\.com|ai\.studio)\/apps\//;
+
+    const readAppletStore = () => {
+      let data = {};
+      try { data = JSON.parse(fs.readFileSync(APPLET_URL_FILE, 'utf8')); } catch { /* 首次运行 */ }
+      if (!Array.isArray(data.list)) {
+        // 旧版单链接形态，就地迁移成名册
+        data = {
+          list: data.url ? [{ name: '默认', url: data.url }] : [],
+          active: data.url ? '默认' : null,
+        };
       }
-    });
-    app.post('/applet-url', (req, res) => {
-      res.set('Access-Control-Allow-Origin', '*');
+      const act = data.list.find(e => e.name === data.active) || data.list[0] || null;
+      data.active = act ? act.name : null;
+      data.url = act ? act.url : null;
+      return data;
+    };
+    const writeAppletStore = (data) => {
+      const act = data.list.find(e => e.name === data.active) || data.list[0] || null;
+      data.active = act ? act.name : null;
+      data.url = act ? act.url : null;
+      fs.writeFileSync(APPLET_URL_FILE, JSON.stringify(data, null, 2));
+    };
+    // 扩展端所有写请求都走 text/plain 免 CORS 预检，这里统一解开
+    const parseTextBody = (req) => {
       let body = req.body;
       if (Buffer.isBuffer(body)) body = body.toString('utf8');
       if (typeof body === 'string') { try { body = JSON.parse(body); } catch { body = {}; } }
-      const url = body?.url;
-      if (!url || !/^https:\/\/(aistudio\.google\.com|ai\.studio)\/apps\//.test(url)) {
+      return body || {};
+    };
+
+    app.get('/applet-url', (req, res) => {
+      res.set('Access-Control-Allow-Origin', '*');
+      res.json({ url: readAppletStore().url });
+    });
+    // 旧版扩展的单链接保存 = 写入名册「默认」并选中
+    app.post('/applet-url', (req, res) => {
+      res.set('Access-Control-Allow-Origin', '*');
+      const url = parseTextBody(req)?.url;
+      if (!url || !APPLET_URL_RE.test(url)) {
         return res.status(400).json({ error: '需要 aistudio.google.com 或 ai.studio 的 Applet 链接' });
       }
-      fs.writeFileSync(APPLET_URL_FILE, JSON.stringify({ url }, null, 2));
+      const store = readAppletStore();
+      const entry = store.list.find(e => e.name === '默认');
+      if (entry) entry.url = url; else store.list.push({ name: '默认', url });
+      store.active = '默认';
+      writeAppletStore(store);
       log.info(`🍬 已保存用户 Applet 链接: ${url}`);
       res.json({ ok: true, url });
+    });
+
+    app.get('/applet-urls', (req, res) => {
+      res.set('Access-Control-Allow-Origin', '*');
+      const { list, active } = readAppletStore();
+      res.json({ list, active });
+    });
+    app.post('/applet-urls', (req, res) => {
+      res.set('Access-Control-Allow-Origin', '*');
+      const { name, url } = parseTextBody(req);
+      const label = String(name || '').trim().slice(0, 30);
+      if (!label) return res.status(400).json({ error: '需要名称' });
+      if (!url || !APPLET_URL_RE.test(url)) {
+        return res.status(400).json({ error: '需要 aistudio.google.com 或 ai.studio 的 Applet 链接' });
+      }
+      const store = readAppletStore();
+      const entry = store.list.find(e => e.name === label);
+      if (entry) entry.url = url; else store.list.push({ name: label, url });
+      if (!store.active) store.active = label;
+      writeAppletStore(store);
+      log.info(`🍬 名册已更新: ${label}`);
+      res.json({ ok: true, list: store.list, active: store.active });
+    });
+    app.post('/applet-urls/active', (req, res) => {
+      res.set('Access-Control-Allow-Origin', '*');
+      const { name } = parseTextBody(req);
+      const store = readAppletStore();
+      const entry = store.list.find(e => e.name === name);
+      if (!entry) return res.status(404).json({ error: '名册里没有这个名字' });
+      store.active = entry.name;
+      writeAppletStore(store);
+      res.json({ ok: true, active: store.active, url: store.url });
+    });
+    app.post('/applet-urls/delete', (req, res) => {
+      res.set('Access-Control-Allow-Origin', '*');
+      const { name } = parseTextBody(req);
+      const store = readAppletStore();
+      const before = store.list.length;
+      store.list = store.list.filter(e => e.name !== name);
+      if (store.list.length === before) return res.status(404).json({ error: '名册里没有这个名字' });
+      if (store.active === name) store.active = null;
+      writeAppletStore(store);
+      res.json({ ok: true, list: store.list, active: store.active });
     });
 
     // 代理所有其他请求
