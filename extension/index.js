@@ -1,7 +1,7 @@
 /**
  * 🍬 CandyBox Proxy - SillyTavern Extension
  * 
- * 版本: 1.0.2
+ * 版本: 1.2.0
  * 功能: 一键打开 Applet
  * 作者: WanWan
  * 仓库: https://github.com/shleeshlee/CandyBox-Proxy
@@ -12,6 +12,7 @@
 import { extension_settings, getContext } from '../../../extensions.js';
 
 const EXTENSION_NAME = 'CandyBox';
+const VERSION = '1.2.0';
 
 // ============================================
 // 配置
@@ -162,6 +163,7 @@ function createUI() {
           <span class="cb-star-1" style="font-size: 10px;">✦</span>
           <b style="font-size: 12px; font-weight: 500;">CandyBox</b>
           <span style="font-size: 12px; font-weight: 400; opacity: 0.8;">Proxy</span>
+          <span style="font-size: 10px; opacity: 0.55;">v${VERSION}</span>
           <span class="cb-star-2" style="font-size: 10px;">✧</span>
         </div>
         <div class="fa-solid fa-chevron-right" style="opacity: 0.7; font-size: 10px;"></div>
@@ -218,7 +220,7 @@ function createUI() {
 // ============================================
 jQuery(async () => {
   try {
-    console.log(`[${EXTENSION_NAME}] 🍬 正在加载...`);
+    console.log(`[${EXTENSION_NAME}] 🍬 v${VERSION} 正在加载...`);
     
     createUI();
     registerProxy();
