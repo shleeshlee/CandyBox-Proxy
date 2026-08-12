@@ -18,7 +18,7 @@ const VERSION = '1.4.4';
 // 配置
 // ============================================
 const CONFIG = {
-  // 公共 Applet 链接（PC 直达的默认目标；可在面板粘贴自己 Remix 副本的公共链接覆盖）。
+  // 公共 Applet 链接（PC 直达固定开这条）。
   // 2026-08 Google 改版后必须带 showAssistant+showPreview 参数打开（withAppletParams 统一追加）
   APPLET_URL: 'https://ai.studio/apps/09f6ee61-3e9e-4123-8d22-b1b473593d82',
 
