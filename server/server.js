@@ -1,7 +1,7 @@
 /**
  * 🍬 CandyBox Proxy - Server
  * 
- * 版本: 1.4.2
+ * 版本: 1.4.3
  * 作者: WanWan
  * 端口: HTTP 8811 / WebSocket 9111
  * 仓库: https://github.com/shleeshlee/CandyBox-Proxy
@@ -233,7 +233,7 @@ class ProxyServer extends EventEmitter {
       
       console.log('');
       console.log('🍬 ═══════════════════════════════════════════');
-      console.log('🍬  CandyBox Proxy v1.4.2');
+      console.log('🍬  CandyBox Proxy v1.4.3');
       console.log('🍬  作者: WanWan');
       console.log('🍬 ═══════════════════════════════════════════');
       console.log(`🍬  HTTP:      http://${this.config.HOST}:${this.config.HTTP_PORT}`);
@@ -262,7 +262,7 @@ class ProxyServer extends EventEmitter {
     app.get('/status', (req, res) => {
       res.json({
         name: 'CandyBox Proxy',
-        version: '1.4.2',
+        version: '1.4.3',
         status: 'running',
         browser_connected: this.connections.isConnected,
         timestamp: new Date().toISOString(),
@@ -289,21 +289,11 @@ class ProxyServer extends EventEmitter {
     });
 
     // 用户自己的 Applet 副本链接（单链接，PC 直达用）。
-    // v1.4.2 起名册功能彻底移除：v1.3 名册残留数据曾让按钮开到与公共链接不同的
-    // 旧 app + 旧参数（remix 死链），废弃功能的数据不允许再掌舵。读取时自动清洗：
-    // 名册条目作废，只认「默认」/单链接形态，且一律剥掉旧参数。
+    // v1.4.2 起名册功能彻底移除：v1.3 名册残留条目曾让按钮开到与公共链接不同的
+    // 旧 app 链接（remix 死链，2026-08-12 排查定案），废弃功能的数据不允许再掌舵。
+    // 读取时只认「默认」条目/单链接形态，名册其余条目一律作废并落盘清掉。
     const APPLET_URL_FILE = path.join(__dirname, 'applet-url.json');
     const APPLET_URL_RE = /^https:\/\/(aistudio\.google\.com|ai\.studio)\/apps\//;
-
-    // fullscreenApplet/showAssistant/showPreview 是 2026-08-10 旧体系的求生参数，
-    // 08-12 改版后带上它们会触发 remix 副本路由并卡死——存量和新保存的一律剥掉
-    const stripLegacyParams = (u) => {
-      try {
-        const url = new URL(u);
-        ['fullscreenApplet', 'showAssistant', 'showPreview'].forEach(p => url.searchParams.delete(p));
-        return url.toString().replace(/\?$/, '');
-      } catch { return u; }
-    };
 
     const readAppletUrl = () => {
       let data = {};
@@ -315,15 +305,15 @@ class ProxyServer extends EventEmitter {
       } else if (typeof data.url === 'string') {
         url = data.url;
       }
-      url = url ? stripLegacyParams(url) : null;
-      // 清洗结果与文件不一致就落盘，残留只活到第一次被读到为止
+      url = url || null;
+      // 清洗结果与文件不一致就落盘，名册残留只活到第一次被读到为止
       const normalized = JSON.stringify({ url });
       let raw = null;
       try { raw = fs.readFileSync(APPLET_URL_FILE, 'utf8'); } catch { /* 没有文件 */ }
       if (raw !== null && raw !== normalized) {
         try {
           fs.writeFileSync(APPLET_URL_FILE, normalized);
-          log.info('🍬 已清洗 applet-url.json 的历史残留（名册/旧参数）');
+          log.info('🍬 已清理 applet-url.json 的名册残留');
         } catch { /* 只读环境也不影响返回值 */ }
       }
       return url;
@@ -345,11 +335,10 @@ class ProxyServer extends EventEmitter {
     });
     app.post('/applet-url', (req, res) => {
       res.set('Access-Control-Allow-Origin', '*');
-      const raw = parseTextBody(req)?.url;
-      if (!raw || !APPLET_URL_RE.test(raw)) {
+      const url = parseTextBody(req)?.url;
+      if (!url || !APPLET_URL_RE.test(url)) {
         return res.status(400).json({ error: '需要 aistudio.google.com 或 ai.studio 的 Applet 链接' });
       }
-      const url = stripLegacyParams(raw);
       writeAppletUrl(url);
       log.info(`🍬 已保存用户 Applet 链接: ${url}`);
       res.json({ ok: true, url });

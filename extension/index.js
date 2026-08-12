@@ -1,7 +1,7 @@
 /**
  * 🍬 CandyBox Proxy - SillyTavern Extension
  * 
- * 版本: 1.4.2
+ * 版本: 1.4.3
  * 功能: PC 直达 + AI Studio 站内入口 + 429 换号提醒
  * 作者: WanWan
  * 仓库: https://github.com/shleeshlee/CandyBox-Proxy
@@ -12,15 +12,14 @@
 import { extension_settings, getContext } from '../../../extensions.js';
 
 const EXTENSION_NAME = 'CandyBox';
-const VERSION = '1.4.2';
+const VERSION = '1.4.3';
 
 // ============================================
 // 配置
 // ============================================
 const CONFIG = {
   // 公共 Applet 链接（PC 直达的默认目标；可在面板粘贴自己 Remix 副本的公共链接覆盖）。
-  // 一律裸链接打开：2026-08-12 实测带 fullscreenApplet/showAssistant/showPreview 参数
-  // 会触发"送进你自己的 remix 副本"的路由并卡死，裸链接才是新体系的正确姿势。
+  // 2026-08 Google 改版后必须带 showAssistant+showPreview 参数打开（withAppletParams 统一追加）
   APPLET_URL: 'https://ai.studio/apps/09f6ee61-3e9e-4123-8d22-b1b473593d82',
 
   // 代理设置
@@ -33,7 +32,16 @@ const CONFIG = {
   STUDIO_URL: 'https://aistudio.google.com/apps',
 };
 
-// 以 noopener,noreferrer 开完整新标签页，等价于"地址栏直接输入"的打开方式
+// 2026-08 改版后直接渲染 app 本体所必需的打开参数（2026-08-10 定案）
+function withAppletParams(u) {
+  const parts = ['fullscreenApplet=true', 'showAssistant=true', 'showPreview=true']
+    .filter((p) => !u.includes(p.split('=')[0]));
+  if (!parts.length) return u;
+  return `${u}${u.includes('?') ? '&' : '?'}${parts.join('&')}`;
+}
+
+// 必须以 noopener,noreferrer 开完整新标签页：带来源信息(referrer/opener)跳转时
+// AI Studio 会把页面丢进无法交互的 Remix 壳，只有"等价于直接输入地址"的打开方式能进 app(2026-08-10 实测)
 function openUrl(url) {
   window.open(url, '_blank', 'noopener,noreferrer');
 }
@@ -65,7 +73,7 @@ async function postPlain(path, data) {
 // ============================================
 async function openApplet() {
   const saved = await getSavedAppletUrl();
-  openUrl(saved || CONFIG.APPLET_URL);
+  openUrl(withAppletParams(saved || CONFIG.APPLET_URL));
 }
 
 // ============================================

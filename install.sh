@@ -6,7 +6,7 @@
 # 仓库: https://github.com/shleeshlee/CandyBox-Proxy
 # ============================================
 
-VERSION="1.4.2"
+VERSION="1.4.3"
 RELEASE_DATE="2026-08-12"
 INSTALL_SCRIPT_URL="https://raw.githubusercontent.com/shleeshlee/CandyBox-Proxy/main/install.sh"
 
