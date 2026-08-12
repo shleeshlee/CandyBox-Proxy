@@ -7,7 +7,7 @@
   "js": "index.js",
   "css": "style.css",
   "author": "shleeshlee",
-  "version": "1.4.3",
+  "version": "1.4.4",
   "auto_update": true,
   "minimum_client_version": "1.0.0"
 }

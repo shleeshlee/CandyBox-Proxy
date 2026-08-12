@@ -1,7 +1,7 @@
 /**
  * 🍬 CandyBox Proxy - SillyTavern Extension
  * 
- * 版本: 1.4.3
+ * 版本: 1.4.4
  * 功能: PC 直达 + AI Studio 站内入口 + 429 换号提醒
  * 作者: WanWan
  * 仓库: https://github.com/shleeshlee/CandyBox-Proxy
@@ -12,7 +12,7 @@
 import { extension_settings, getContext } from '../../../extensions.js';
 
 const EXTENSION_NAME = 'CandyBox';
-const VERSION = '1.4.3';
+const VERSION = '1.4.4';
 
 // ============================================
 // 配置
@@ -26,10 +26,9 @@ const CONFIG = {
   PROXY_URL: 'http://127.0.0.1:8811',
   PROXY_NAME: 'CandyBox',
 
-  // AI Studio 站内入口（My apps 列表页）。2026-08-12 改版后手机端唯一可用入口：
-  // 链接直开会撞 Remix 墙，从站内列表点 app 一切正常。换号也在站内完成
-  // （头像 → 退出当前账号 → 登下一个号；注意必须退出，点"切换"无效）。
-  STUDIO_URL: 'https://aistudio.google.com/apps',
+  // AI Studio 站内入口：My apps 的 By you 列表（自己 Remix 的 app 直接在这页点开）。
+  // 换号也在站内完成（头像 → 退出当前账号 → 登下一个号；必须退出，点"切换"无效）。
+  STUDIO_URL: 'https://aistudio.google.com/apps?source=user&tag=created-by-you',
 };
 
 // 2026-08 改版后直接渲染 app 本体所必需的打开参数（2026-08-10 定案）
@@ -47,33 +46,11 @@ function openUrl(url) {
 }
 
 // ============================================
-// 服务端接口（链接保存在本地 server，粘贴一次永久生效）
+// 打开 Applet（PC 直达：固定开公共链接。自定义链接保存功能已随名册一并移除——
+// 存下来的链接曾在平台改版后变成死链还继续掌舵，此类状态一律不留）
 // ============================================
-async function getSavedAppletUrl() {
-  try {
-    const r = await fetch(`${CONFIG.PROXY_URL}/applet-url`);
-    const j = await r.json();
-    return j.url || null;
-  } catch {
-    return null;
-  }
-}
-
-// text/plain 避免 CORS 预检（服务端会自己解析）
-async function postPlain(path, data) {
-  return fetch(`${CONFIG.PROXY_URL}${path}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'text/plain' },
-    body: JSON.stringify(data),
-  });
-}
-
-// ============================================
-// 打开 Applet（PC 直达：开保存的链接，没存过就开公共链接）
-// ============================================
-async function openApplet() {
-  const saved = await getSavedAppletUrl();
-  openUrl(withAppletParams(saved || CONFIG.APPLET_URL));
+function openApplet() {
+  openUrl(withAppletParams(CONFIG.APPLET_URL));
 }
 
 // ============================================
@@ -206,31 +183,14 @@ function createUI() {
           <div class="fa-solid fa-chevron-right" style="opacity: 0.7; font-size: 10px;"></div>
         </div>
       </div>
-      <div id="cb_studio" title="手机/换号用：进 AI Studio，从 My apps 列表点你 Remix 的 app">
+      <div id="cb_studio" title="手机/换号用：进 AI Studio 的 By you 列表，点你 Remix 的 app">
         <span>📱 AI Studio 入口</span>
-        <span style="font-weight: 400; opacity: 0.6; font-size: 11px;">手机从 My apps 点 app · 换号先退出再登录</span>
-      </div>
-      <div id="cb_setup" style="margin: 4px 0 2px;">
-        <input id="cb_applet_url" class="text_pole" type="text"
-          placeholder="可选：粘贴你自己 Remix 副本的公共链接（PC 直达用）"
-          style="width: 100%; font-size: 11px; box-sizing: border-box;">
-        <div style="display: flex; gap: 6px; margin-top: 4px; align-items: center;">
-          <div id="cb_save_url" class="menu_button" style="font-size: 11px; padding: 2px 12px; margin: 0; white-space: nowrap; width: auto;">保存链接</div>
-          <span id="cb_url_status" style="font-size: 11px; opacity: 0.75;"></span>
-        </div>
+        <span style="font-weight: 400; opacity: 0.6; font-size: 11px;">先remix后使用，换号必须退出再登录</span>
       </div>
     </div>
   `;
 
   $('#extensions_settings2').append(html);
-
-  // 显示已保存的链接
-  getSavedAppletUrl().then((saved) => {
-    if (saved) {
-      $('#cb_applet_url').val(saved);
-      $('#cb_url_status').text('✓ PC 直达用你自己的副本');
-    }
-  });
 
   // 点击本体：PC 直达
   $(document).on('click', '#cb_panel', (e) => {
@@ -244,28 +204,6 @@ function createUI() {
     e.preventDefault();
     e.stopPropagation();
     openUrl(CONFIG.STUDIO_URL);
-  });
-
-  // 保存用户自己的副本链接（PC 直达用）
-  $(document).on('click', '#cb_save_url', async (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    const url = String($('#cb_applet_url').val() || '').trim();
-    if (!/^https:\/\/(aistudio\.google\.com|ai\.studio)\/apps\//.test(url)) {
-      $('#cb_url_status').text('✗ 链接不对，要 aistudio.google.com/apps/... 形态');
-      return;
-    }
-    try {
-      const r = await postPlain('/applet-url', { url });
-      if (r.ok) {
-        $('#cb_url_status').text('✓ 已保存，PC 直达走你自己的副本');
-      } else {
-        const j = await r.json().catch(() => ({}));
-        $('#cb_url_status').text(`✗ ${j.error || '保存失败'}`);
-      }
-    } catch {
-      $('#cb_url_status').text('✗ 保存失败，CandyBox 服务没启动？');
-    }
   });
 }
 

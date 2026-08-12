@@ -1,7 +1,7 @@
 /**
  * 🍬 CandyBox Proxy - Server
  * 
- * 版本: 1.4.3
+ * 版本: 1.4.4
  * 作者: WanWan
  * 端口: HTTP 8811 / WebSocket 9111
  * 仓库: https://github.com/shleeshlee/CandyBox-Proxy
@@ -227,13 +227,15 @@ class ProxyServer extends EventEmitter {
 
   async start() {
     try {
+      // 清理已废除的自定义链接存档，防止任何旧数据再被误用
+      try { fs.unlinkSync(path.join(__dirname, 'applet-url.json')); log.info('🍬 已删除废弃的 applet-url.json'); } catch { /* 不存在即最佳 */ }
       this.syncExtensionSnapshot();
       await this.startHTTP();
       await this.startWebSocket();
       
       console.log('');
       console.log('🍬 ═══════════════════════════════════════════');
-      console.log('🍬  CandyBox Proxy v1.4.3');
+      console.log('🍬  CandyBox Proxy v1.4.4');
       console.log('🍬  作者: WanWan');
       console.log('🍬 ═══════════════════════════════════════════');
       console.log(`🍬  HTTP:      http://${this.config.HOST}:${this.config.HTTP_PORT}`);
@@ -262,7 +264,7 @@ class ProxyServer extends EventEmitter {
     app.get('/status', (req, res) => {
       res.json({
         name: 'CandyBox Proxy',
-        version: '1.4.3',
+        version: '1.4.4',
         status: 'running',
         browser_connected: this.connections.isConnected,
         timestamp: new Date().toISOString(),
@@ -288,61 +290,10 @@ class ProxyServer extends EventEmitter {
       res.json({ accounts: [{ id: 'candybox', name: 'CandyBox Proxy' }] });
     });
 
-    // 用户自己的 Applet 副本链接（单链接，PC 直达用）。
-    // v1.4.2 起名册功能彻底移除：v1.3 名册残留条目曾让按钮开到与公共链接不同的
-    // 旧 app 链接（remix 死链，2026-08-12 排查定案），废弃功能的数据不允许再掌舵。
-    // 读取时只认「默认」条目/单链接形态，名册其余条目一律作废并落盘清掉。
-    const APPLET_URL_FILE = path.join(__dirname, 'applet-url.json');
-    const APPLET_URL_RE = /^https:\/\/(aistudio\.google\.com|ai\.studio)\/apps\//;
-
-    const readAppletUrl = () => {
-      let data = {};
-      try { data = JSON.parse(fs.readFileSync(APPLET_URL_FILE, 'utf8')); } catch { /* 首次运行 */ }
-      // 兼容读取历史形态：v1.3 名册只认「默认」条目，其余作废；更早的单链接形态直接用
-      let url = null;
-      if (Array.isArray(data.list)) {
-        url = (data.list.find(e => e.name === '默认') || {}).url || null;
-      } else if (typeof data.url === 'string') {
-        url = data.url;
-      }
-      url = url || null;
-      // 清洗结果与文件不一致就落盘，名册残留只活到第一次被读到为止
-      const normalized = JSON.stringify({ url });
-      let raw = null;
-      try { raw = fs.readFileSync(APPLET_URL_FILE, 'utf8'); } catch { /* 没有文件 */ }
-      if (raw !== null && raw !== normalized) {
-        try {
-          fs.writeFileSync(APPLET_URL_FILE, normalized);
-          log.info('🍬 已清理 applet-url.json 的名册残留');
-        } catch { /* 只读环境也不影响返回值 */ }
-      }
-      return url;
-    };
-    const writeAppletUrl = (url) => {
-      fs.writeFileSync(APPLET_URL_FILE, JSON.stringify({ url }));
-    };
-    // 扩展端所有写请求都走 text/plain 免 CORS 预检，这里统一解开
-    const parseTextBody = (req) => {
-      let body = req.body;
-      if (Buffer.isBuffer(body)) body = body.toString('utf8');
-      if (typeof body === 'string') { try { body = JSON.parse(body); } catch { body = {}; } }
-      return body || {};
-    };
-
-    app.get('/applet-url', (req, res) => {
-      res.set('Access-Control-Allow-Origin', '*');
-      res.json({ url: readAppletUrl() });
-    });
-    app.post('/applet-url', (req, res) => {
-      res.set('Access-Control-Allow-Origin', '*');
-      const url = parseTextBody(req)?.url;
-      if (!url || !APPLET_URL_RE.test(url)) {
-        return res.status(400).json({ error: '需要 aistudio.google.com 或 ai.studio 的 Applet 链接' });
-      }
-      writeAppletUrl(url);
-      log.info(`🍬 已保存用户 Applet 链接: ${url}`);
-      res.json({ ok: true, url });
-    });
+    // 自定义 Applet 链接功能已于 v1.4.4 整体移除（名册与单链接保存皆废）：
+    // 存下来的链接在平台改版后变成死链却继续掌舵（2026-08-12 事故），
+    // 此类可过期状态一律不留，扩展端固定开公共链接。残留的 applet-url.json
+    // 由启动时清理（见 start()）。
 
     // 代理所有其他请求
     app.all('*', (req, res) => this.handleRequest(req, res));
