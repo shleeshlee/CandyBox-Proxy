@@ -1,7 +1,7 @@
 /**
  * 🍬 CandyBox Proxy - Server
  * 
- * 版本: 1.4.1
+ * 版本: 1.4.2
  * 作者: WanWan
  * 端口: HTTP 8811 / WebSocket 9111
  * 仓库: https://github.com/shleeshlee/CandyBox-Proxy
@@ -233,7 +233,7 @@ class ProxyServer extends EventEmitter {
       
       console.log('');
       console.log('🍬 ═══════════════════════════════════════════');
-      console.log('🍬  CandyBox Proxy v1.4.1');
+      console.log('🍬  CandyBox Proxy v1.4.2');
       console.log('🍬  作者: WanWan');
       console.log('🍬 ═══════════════════════════════════════════');
       console.log(`🍬  HTTP:      http://${this.config.HOST}:${this.config.HTTP_PORT}`);
@@ -262,7 +262,7 @@ class ProxyServer extends EventEmitter {
     app.get('/status', (req, res) => {
       res.json({
         name: 'CandyBox Proxy',
-        version: '1.4.1',
+        version: '1.4.2',
         status: 'running',
         browser_connected: this.connections.isConnected,
         timestamp: new Date().toISOString(),
@@ -288,34 +288,48 @@ class ProxyServer extends EventEmitter {
       res.json({ accounts: [{ id: 'candybox', name: 'CandyBox Proxy' }] });
     });
 
-    // 用户自己的 Applet 副本链接。
-    // 2026-08-12 AI Studio 改版后手机端只能从站内 My apps 列表进 app，多账号切换在
-    // 站内完成（退出→登录→点自己的 Remix），不再按号存链接；v1.4.0 起扩展只用单链接
-    // （PC 直达）。文件仍是 applet-url.json：{ list: [{name, url}], active, url }，
-    // url 字段镜像 active 那条；/applet-urls 名册端点保留，兼容 v1.3 旧扩展。
+    // 用户自己的 Applet 副本链接（单链接，PC 直达用）。
+    // v1.4.2 起名册功能彻底移除：v1.3 名册残留数据曾让按钮开到与公共链接不同的
+    // 旧 app + 旧参数（remix 死链），废弃功能的数据不允许再掌舵。读取时自动清洗：
+    // 名册条目作废，只认「默认」/单链接形态，且一律剥掉旧参数。
     const APPLET_URL_FILE = path.join(__dirname, 'applet-url.json');
     const APPLET_URL_RE = /^https:\/\/(aistudio\.google\.com|ai\.studio)\/apps\//;
 
-    const readAppletStore = () => {
+    // fullscreenApplet/showAssistant/showPreview 是 2026-08-10 旧体系的求生参数，
+    // 08-12 改版后带上它们会触发 remix 副本路由并卡死——存量和新保存的一律剥掉
+    const stripLegacyParams = (u) => {
+      try {
+        const url = new URL(u);
+        ['fullscreenApplet', 'showAssistant', 'showPreview'].forEach(p => url.searchParams.delete(p));
+        return url.toString().replace(/\?$/, '');
+      } catch { return u; }
+    };
+
+    const readAppletUrl = () => {
       let data = {};
       try { data = JSON.parse(fs.readFileSync(APPLET_URL_FILE, 'utf8')); } catch { /* 首次运行 */ }
-      if (!Array.isArray(data.list)) {
-        // 旧版单链接形态，就地迁移成名册
-        data = {
-          list: data.url ? [{ name: '默认', url: data.url }] : [],
-          active: data.url ? '默认' : null,
-        };
+      // 兼容读取历史形态：v1.3 名册只认「默认」条目，其余作废；更早的单链接形态直接用
+      let url = null;
+      if (Array.isArray(data.list)) {
+        url = (data.list.find(e => e.name === '默认') || {}).url || null;
+      } else if (typeof data.url === 'string') {
+        url = data.url;
       }
-      const act = data.list.find(e => e.name === data.active) || data.list[0] || null;
-      data.active = act ? act.name : null;
-      data.url = act ? act.url : null;
-      return data;
+      url = url ? stripLegacyParams(url) : null;
+      // 清洗结果与文件不一致就落盘，残留只活到第一次被读到为止
+      const normalized = JSON.stringify({ url });
+      let raw = null;
+      try { raw = fs.readFileSync(APPLET_URL_FILE, 'utf8'); } catch { /* 没有文件 */ }
+      if (raw !== null && raw !== normalized) {
+        try {
+          fs.writeFileSync(APPLET_URL_FILE, normalized);
+          log.info('🍬 已清洗 applet-url.json 的历史残留（名册/旧参数）');
+        } catch { /* 只读环境也不影响返回值 */ }
+      }
+      return url;
     };
-    const writeAppletStore = (data) => {
-      const act = data.list.find(e => e.name === data.active) || data.list[0] || null;
-      data.active = act ? act.name : null;
-      data.url = act ? act.url : null;
-      fs.writeFileSync(APPLET_URL_FILE, JSON.stringify(data, null, 2));
+    const writeAppletUrl = (url) => {
+      fs.writeFileSync(APPLET_URL_FILE, JSON.stringify({ url }));
     };
     // 扩展端所有写请求都走 text/plain 免 CORS 预检，这里统一解开
     const parseTextBody = (req) => {
@@ -327,65 +341,18 @@ class ProxyServer extends EventEmitter {
 
     app.get('/applet-url', (req, res) => {
       res.set('Access-Control-Allow-Origin', '*');
-      res.json({ url: readAppletStore().url });
+      res.json({ url: readAppletUrl() });
     });
-    // 旧版扩展的单链接保存 = 写入名册「默认」并选中
     app.post('/applet-url', (req, res) => {
       res.set('Access-Control-Allow-Origin', '*');
-      const url = parseTextBody(req)?.url;
-      if (!url || !APPLET_URL_RE.test(url)) {
+      const raw = parseTextBody(req)?.url;
+      if (!raw || !APPLET_URL_RE.test(raw)) {
         return res.status(400).json({ error: '需要 aistudio.google.com 或 ai.studio 的 Applet 链接' });
       }
-      const store = readAppletStore();
-      const entry = store.list.find(e => e.name === '默认');
-      if (entry) entry.url = url; else store.list.push({ name: '默认', url });
-      store.active = '默认';
-      writeAppletStore(store);
+      const url = stripLegacyParams(raw);
+      writeAppletUrl(url);
       log.info(`🍬 已保存用户 Applet 链接: ${url}`);
       res.json({ ok: true, url });
-    });
-
-    app.get('/applet-urls', (req, res) => {
-      res.set('Access-Control-Allow-Origin', '*');
-      const { list, active } = readAppletStore();
-      res.json({ list, active });
-    });
-    app.post('/applet-urls', (req, res) => {
-      res.set('Access-Control-Allow-Origin', '*');
-      const { name, url } = parseTextBody(req);
-      const label = String(name || '').trim().slice(0, 30);
-      if (!label) return res.status(400).json({ error: '需要名称' });
-      if (!url || !APPLET_URL_RE.test(url)) {
-        return res.status(400).json({ error: '需要 aistudio.google.com 或 ai.studio 的 Applet 链接' });
-      }
-      const store = readAppletStore();
-      const entry = store.list.find(e => e.name === label);
-      if (entry) entry.url = url; else store.list.push({ name: label, url });
-      if (!store.active) store.active = label;
-      writeAppletStore(store);
-      log.info(`🍬 名册已更新: ${label}`);
-      res.json({ ok: true, list: store.list, active: store.active });
-    });
-    app.post('/applet-urls/active', (req, res) => {
-      res.set('Access-Control-Allow-Origin', '*');
-      const { name } = parseTextBody(req);
-      const store = readAppletStore();
-      const entry = store.list.find(e => e.name === name);
-      if (!entry) return res.status(404).json({ error: '名册里没有这个名字' });
-      store.active = entry.name;
-      writeAppletStore(store);
-      res.json({ ok: true, active: store.active, url: store.url });
-    });
-    app.post('/applet-urls/delete', (req, res) => {
-      res.set('Access-Control-Allow-Origin', '*');
-      const { name } = parseTextBody(req);
-      const store = readAppletStore();
-      const before = store.list.length;
-      store.list = store.list.filter(e => e.name !== name);
-      if (store.list.length === before) return res.status(404).json({ error: '名册里没有这个名字' });
-      if (store.active === name) store.active = null;
-      writeAppletStore(store);
-      res.json({ ok: true, list: store.list, active: store.active });
     });
 
     // 代理所有其他请求

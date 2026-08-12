@@ -1,7 +1,7 @@
 /**
  * 🍬 CandyBox Proxy - SillyTavern Extension
  * 
- * 版本: 1.4.1
+ * 版本: 1.4.2
  * 功能: PC 直达 + AI Studio 站内入口 + 429 换号提醒
  * 作者: WanWan
  * 仓库: https://github.com/shleeshlee/CandyBox-Proxy
@@ -12,7 +12,7 @@
 import { extension_settings, getContext } from '../../../extensions.js';
 
 const EXTENSION_NAME = 'CandyBox';
-const VERSION = '1.4.1';
+const VERSION = '1.4.2';
 
 // ============================================
 // 配置

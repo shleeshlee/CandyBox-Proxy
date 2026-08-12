@@ -1,6 +1,6 @@
 {
   "name": "candybox-proxy",
-  "version": "1.4.1",
+  "version": "1.4.2",
   "description": "CandyBox Proxy - Access Gemini API via browser",
   "main": "index.js",
   "scripts": {
