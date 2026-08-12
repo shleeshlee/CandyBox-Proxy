@@ -1,8 +1,8 @@
 /**
  * 🍬 CandyBox Proxy - SillyTavern Extension
  * 
- * 版本: 1.3.1
- * 功能: 一键打开 Applet + 多账号名册下拉栏
+ * 版本: 1.4.0
+ * 功能: PC 直达 + AI Studio 站内入口 + 429 换号提醒
  * 作者: WanWan
  * 仓库: https://github.com/shleeshlee/CandyBox-Proxy
  * 
@@ -12,26 +12,28 @@
 import { extension_settings, getContext } from '../../../extensions.js';
 
 const EXTENSION_NAME = 'CandyBox';
-const VERSION = '1.3.1';
+const VERSION = '1.4.0';
 
 // ============================================
 // 配置
 // ============================================
 const CONFIG = {
-  // 公共 Applet 链接。2026-08 Google 改版后必须带 showAssistant+showPreview 参数打开，
-  // 否则会落在无法交互的 Remix 页（withAppletParams 统一追加）
+  // 公共 Applet 链接（PC 直达的默认目标；可在面板粘贴自己 Remix 副本的公共链接覆盖）。
+  // 2026-08 Google 改版后必须带 showAssistant+showPreview 参数打开（withAppletParams 统一追加）
   APPLET_URL: 'https://ai.studio/apps/09f6ee61-3e9e-4123-8d22-b1b473593d82',
 
   // 代理设置
   PROXY_URL: 'http://127.0.0.1:8811',
   PROXY_NAME: 'CandyBox',
 
-  // 下拉栏第一项：切换 Google 账号（applet 面板「退出账号」的同款去处）。
-  // 选完账号会落回 AI Studio，再点名册里对应的 applet 即可
-  ACCOUNT_SWITCH_URL: 'https://accounts.google.com/AccountChooser?continue=https%3A%2F%2Faistudio.google.com%2Fapps',
+  // AI Studio 站内入口（My apps 列表页）。2026-08-12 改版后手机端唯一可用入口：
+  // 链接直开会撞 Remix 墙，从站内列表点 app 一切正常。换号也在站内完成
+  // （头像 → 退出当前账号 → 登下一个号；注意必须退出，点"切换"无效）。
+  STUDIO_URL: 'https://aistudio.google.com/apps',
 };
 
-// 2026-08 改版后直接渲染 app 本体所必需的打开参数
+// 2026-08 改版后直接渲染 app 本体所必需的打开参数。
+// ⚠️ 2026-08-12 起此姿势仅 PC 浏览器有效，手机端请走「AI Studio 入口」
 function withAppletParams(u) {
   const parts = ['fullscreenApplet=true', 'showAssistant=true', 'showPreview=true']
     .filter((p) => !u.includes(p.split('=')[0]));
@@ -46,7 +48,7 @@ function openUrl(url) {
 }
 
 // ============================================
-// 服务端接口（名册保存在本地 server，粘贴一次永久生效）
+// 服务端接口（链接保存在本地 server，粘贴一次永久生效）
 // ============================================
 async function getSavedAppletUrl() {
   try {
@@ -67,20 +69,8 @@ async function postPlain(path, data) {
   });
 }
 
-// 名册。服务端是 v1.2 旧版或没启动时返回 null，UI 会提示
-async function getRoster() {
-  try {
-    const r = await fetch(`${CONFIG.PROXY_URL}/applet-urls`);
-    if (!r.ok) return null;
-    const j = await r.json();
-    return Array.isArray(j.list) ? j : null;
-  } catch {
-    return null;
-  }
-}
-
 // ============================================
-// 打开 Applet（本体按钮：开当前选中那条）
+// 打开 Applet（PC 直达：开保存的链接，没存过就开公共链接）
 // ============================================
 async function openApplet() {
   const saved = await getSavedAppletUrl();
@@ -88,27 +78,25 @@ async function openApplet() {
 }
 
 // ============================================
-// 名册下拉栏渲染
+// 429 换号提醒（SSE，服务端检测到配额 429 时推送）
 // ============================================
-async function renderRoster() {
-  const roster = await getRoster();
-  const $entries = $('#cb_dd_entries').empty();
-
-  if (!roster) {
-    $entries.append(
-      $('<div>').css({ 'font-size': '11px', opacity: 0.6, padding: '4px 8px' })
-        .text('名册不可用：CandyBox 服务未启动或还是 v1.2 旧版')
-    );
-    return;
-  }
-
-  for (const entry of roster.list) {
-    const isActive = entry.name === roster.active;
-    const $row = $('<div>').addClass('cb-dd-item cb-dd-applet').attr('data-name', entry.name);
-    $row.append($('<span>').text(`${isActive ? '✓ ' : ''}${entry.name}`));
-    $row.append($('<span>').addClass('cb-dd-del').attr('data-name', entry.name).attr('title', '删除').text('✕'));
-    $entries.append($row);
-  }
+let eventSource = null;
+function connectEvents() {
+  try {
+    if (eventSource) eventSource.close();
+    eventSource = new EventSource(`${CONFIG.PROXY_URL}/events`);
+    eventSource.addEventListener('quota', () => {
+      console.warn(`[${EXTENSION_NAME}] 🍬 收到 429，该换号了`);
+      if (typeof toastr !== 'undefined') {
+        toastr.warning('这个号的额度可能用完了（429）。点面板里的「AI Studio 入口」进站内换号。', 'CandyBox', { timeOut: 10000 });
+      }
+    });
+    eventSource.onerror = () => {
+      eventSource.close();
+      eventSource = null;
+      setTimeout(connectEvents, 15000);
+    };
+  } catch { /* 服务端没启动，重连兜底 */ }
 }
 
 // ============================================
@@ -187,40 +175,26 @@ function createUI() {
       background: linear-gradient(135deg, #4b5563 0%, #6b7280 50%, #9ca3af 100%);
       box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
     }
-    #cb_dd_toggle {
+    #cb_studio {
       cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
       font-size: 12px;
       font-weight: 600;
-      padding: 4px 10px;
+      padding: 5px 10px;
       border-radius: 6px;
       background: rgba(107, 114, 128, 0.25);
       user-select: none;
       margin: 3px 0 1px;
     }
-    #cb_dd_toggle:hover { background: rgba(107, 114, 128, 0.4); }
-    .cb-dd-item {
-      cursor: pointer;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 12px;
-      padding: 4px 10px;
-      border-radius: 6px;
-      margin: 1px 0;
-    }
-    .cb-dd-item:hover { background: rgba(107, 114, 128, 0.35); }
-    .cb-dd-del {
-      opacity: 0.5;
-      font-size: 11px;
-      padding: 0 4px;
-    }
-    .cb-dd-del:hover { opacity: 1; }
+    #cb_studio:hover { background: rgba(107, 114, 128, 0.4); }
   `;
   document.head.appendChild(styleSheet);
 
   const html = `
     <div id="candybox_container" class="extension_container">
-      <div id="cb_panel">
+      <div id="cb_panel" title="PC 浏览器用：直接打开 Applet 链接">
         <div style="display: flex; align-items: center; gap: 6px;">
           <span class="cb-star-1" style="font-size: 10px;">✦</span>
           <b style="font-size: 12px; font-weight: 500;">CandyBox</b>
@@ -228,111 +202,64 @@ function createUI() {
           <span style="font-size: 10px; opacity: 0.55;">v${VERSION}</span>
           <span class="cb-star-2" style="font-size: 10px;">✧</span>
         </div>
-        <div class="fa-solid fa-chevron-right" style="opacity: 0.7; font-size: 10px;"></div>
-      </div>
-      <div id="cb_dd_toggle">▾ 账号名册</div>
-      <div id="cb_dd_list">
-        <div class="cb-dd-item" id="cb_switch_google">
-          <span>🔄 切换 Google 账号</span>
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <span style="font-size: 10px; opacity: 0.6;">⚡ PC 直达</span>
+          <div class="fa-solid fa-chevron-right" style="opacity: 0.7; font-size: 10px;"></div>
         </div>
-        <div id="cb_dd_entries"></div>
-        <div id="cb_setup" style="margin: 4px 0 2px;">
-          <input id="cb_applet_name" class="text_pole" type="text"
-            placeholder="名称（比如：A号）"
-            style="width: 100%; font-size: 11px; box-sizing: border-box;">
-          <input id="cb_applet_url" class="text_pole" type="text"
-            placeholder="该账号 Remix 出的 Applet 链接（aistudio.google.com/apps/...）"
-            style="width: 100%; font-size: 11px; box-sizing: border-box; margin-top: 3px;">
-          <div style="display: flex; gap: 6px; margin-top: 4px; align-items: center;">
-            <div id="cb_save_url" class="menu_button" style="font-size: 11px; padding: 2px 12px; margin: 0; white-space: nowrap; width: auto;">添加 / 更新</div>
-            <span id="cb_url_status" style="font-size: 11px; opacity: 0.75;"></span>
-          </div>
+      </div>
+      <div id="cb_studio" title="手机/换号用：进 AI Studio，从 My apps 列表点你 Remix 的 app">
+        <span>📱 AI Studio 入口</span>
+        <span style="font-weight: 400; opacity: 0.6; font-size: 11px;">手机从 My apps 点 app · 换号先退出再登录</span>
+      </div>
+      <div id="cb_setup" style="margin: 4px 0 2px;">
+        <input id="cb_applet_url" class="text_pole" type="text"
+          placeholder="可选：粘贴你自己 Remix 副本的公共链接（PC 直达用）"
+          style="width: 100%; font-size: 11px; box-sizing: border-box;">
+        <div style="display: flex; gap: 6px; margin-top: 4px; align-items: center;">
+          <div id="cb_save_url" class="menu_button" style="font-size: 11px; padding: 2px 12px; margin: 0; white-space: nowrap; width: auto;">保存链接</div>
+          <span id="cb_url_status" style="font-size: 11px; opacity: 0.75;"></span>
         </div>
       </div>
     </div>
   `;
 
   $('#extensions_settings2').append(html);
-  renderRoster();
 
-  // 点击本体：打开当前选中的 Applet（PC 直达）
+  // 显示已保存的链接
+  getSavedAppletUrl().then((saved) => {
+    if (saved) {
+      $('#cb_applet_url').val(saved);
+      $('#cb_url_status').text('✓ PC 直达用你自己的副本');
+    }
+  });
+
+  // 点击本体：PC 直达
   $(document).on('click', '#cb_panel', (e) => {
     e.preventDefault();
     e.stopPropagation();
     openApplet();
   });
 
-  // 展开/收起名册
-  $(document).on('click', '#cb_dd_toggle', (e) => {
+  // AI Studio 站内入口（手机 / 换号）
+  $(document).on('click', '#cb_studio', (e) => {
     e.preventDefault();
     e.stopPropagation();
-    const $list = $('#cb_dd_list');
-    const open = $list.is(':visible');
-    $list.toggle(!open);
-    $('#cb_dd_toggle').text(`${open ? '▸' : '▾'} 账号名册`);
-    if (!open) renderRoster();
+    openUrl(CONFIG.STUDIO_URL);
   });
 
-  // 第一项：切换 Google 账号
-  $(document).on('click', '#cb_switch_google', (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    openUrl(CONFIG.ACCOUNT_SWITCH_URL);
-  });
-
-  // 点名字：选中并打开该账号的 Applet
-  $(document).on('click', '.cb-dd-applet', async (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    const name = $(e.currentTarget).attr('data-name');
-    try {
-      const r = await postPlain('/applet-urls/active', { name });
-      const j = await r.json().catch(() => ({}));
-      if (r.ok && j.url) {
-        openUrl(withAppletParams(j.url));
-        renderRoster();
-      } else {
-        $('#cb_url_status').text(`✗ ${j.error || '切换失败'}`);
-      }
-    } catch {
-      $('#cb_url_status').text('✗ CandyBox 服务没启动？');
-    }
-  });
-
-  // 删除名册条目
-  $(document).on('click', '.cb-dd-del', async (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    const name = $(e.currentTarget).attr('data-name');
-    try {
-      await postPlain('/applet-urls/delete', { name });
-      renderRoster();
-    } catch { /* 服务端没起，renderRoster 会提示 */ }
-  });
-
-  // 添加 / 更新名册条目（服务端是 v1.2 旧版时退回单链接保存）
+  // 保存用户自己的副本链接（PC 直达用）
   $(document).on('click', '#cb_save_url', async (e) => {
     e.preventDefault();
     e.stopPropagation();
-    const name = String($('#cb_applet_name').val() || '').trim();
     const url = String($('#cb_applet_url').val() || '').trim();
     if (!/^https:\/\/(aistudio\.google\.com|ai\.studio)\/apps\//.test(url)) {
       $('#cb_url_status').text('✗ 链接不对，要 aistudio.google.com/apps/... 形态');
       return;
     }
     try {
-      let r;
-      if (name) {
-        r = await postPlain('/applet-urls', { name, url });
-        if (r.status === 404) r = await postPlain('/applet-url', { url }); // 旧版服务端
-      } else {
-        r = await postPlain('/applet-url', { url });
-      }
+      const r = await postPlain('/applet-url', { url });
       if (r.ok) {
-        $('#cb_url_status').text('✓ 已保存');
-        $('#cb_applet_name').val('');
-        $('#cb_applet_url').val('');
-        renderRoster();
+        $('#cb_url_status').text('✓ 已保存，PC 直达走你自己的副本');
       } else {
         const j = await r.json().catch(() => ({}));
         $('#cb_url_status').text(`✗ ${j.error || '保存失败'}`);
@@ -352,7 +279,8 @@ jQuery(async () => {
     
     createUI();
     registerProxy();
-    
+    connectEvents();
+
     console.log(`[${EXTENSION_NAME}] ✅ 加载完成`);
   } catch (error) {
     console.error(`[${EXTENSION_NAME}] ❌ 加载失败:`, error);

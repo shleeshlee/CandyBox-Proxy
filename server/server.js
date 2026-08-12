@@ -1,7 +1,7 @@
 /**
  * 🍬 CandyBox Proxy - Server
  * 
- * 版本: 1.3.1
+ * 版本: 1.4.0
  * 作者: WanWan
  * 端口: HTTP 8811 / WebSocket 9111
  * 仓库: https://github.com/shleeshlee/CandyBox-Proxy
@@ -199,16 +199,41 @@ class ProxyServer extends EventEmitter {
     this.connections = new ConnectionManager();
     this.httpServer = null;
     this.wsServer = null;
+    this.sseClients = new Set();
+  }
+
+  // 向所有已连接的酒馆扩展页广播事件（429 换号提醒等）
+  broadcastEvent(event, data) {
+    const payload = `event: ${event}\ndata: ${JSON.stringify(data || {})}\n\n`;
+    this.sseClients.forEach((res) => {
+      try { res.write(payload); } catch { this.sseClients.delete(res); }
+    });
+  }
+
+  // 扩展快照自动同步（修复：更新只刷新 plugins/CandyBox 这份 clone，
+  // 而酒馆页面加载的是 public/scripts/extensions/third-party/CandyBox 这份复制品，
+  // 导致服务端与面板版本静默分家。每次启动把扩展重新复制过去，任何更新方式都能生效）
+  syncExtensionSnapshot() {
+    try {
+      const src = path.resolve(__dirname, '..', 'extension');
+      const targetParent = path.resolve(__dirname, '..', '..', '..', 'public', 'scripts', 'extensions', 'third-party');
+      if (!fs.existsSync(src) || !fs.existsSync(targetParent)) return; // 不在标准酒馆目录里跑，跳过
+      fs.cpSync(src, path.join(targetParent, 'CandyBox'), { recursive: true });
+      log.info('🍬 扩展快照已同步（third-party/CandyBox 与服务端同版本）');
+    } catch (e) {
+      log.warn(`扩展快照同步失败（不影响代理运行）: ${e.message}`);
+    }
   }
 
   async start() {
     try {
+      this.syncExtensionSnapshot();
       await this.startHTTP();
       await this.startWebSocket();
       
       console.log('');
       console.log('🍬 ═══════════════════════════════════════════');
-      console.log('🍬  CandyBox Proxy v1.3.1');
+      console.log('🍬  CandyBox Proxy v1.4.0');
       console.log('🍬  作者: WanWan');
       console.log('🍬 ═══════════════════════════════════════════');
       console.log(`🍬  HTTP:      http://${this.config.HOST}:${this.config.HTTP_PORT}`);
@@ -237,11 +262,25 @@ class ProxyServer extends EventEmitter {
     app.get('/status', (req, res) => {
       res.json({
         name: 'CandyBox Proxy',
-        version: '1.3.1',
+        version: '1.4.0',
         status: 'running',
         browser_connected: this.connections.isConnected,
         timestamp: new Date().toISOString(),
       });
+    });
+
+    // 事件推送（SSE）：酒馆扩展页连这里收 429 换号提醒
+    app.get('/events', (req, res) => {
+      res.set({
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive',
+        'Access-Control-Allow-Origin': '*',
+      });
+      res.flushHeaders?.();
+      res.write(': connected\n\n');
+      this.sseClients.add(res);
+      req.on('close', () => this.sseClients.delete(res));
     });
 
     // 拦截酒馆健康检查（/accounts 不存在于 Gemini API）
@@ -249,11 +288,11 @@ class ProxyServer extends EventEmitter {
       res.json({ accounts: [{ id: 'candybox', name: 'CandyBox Proxy' }] });
     });
 
-    // 用户自己的 Applet 副本链接 —— v1.3.0 起是多账号名册
-    // AI Studio 只让 applet 的主人号直进（非主人撞 Remix 墙），所以多账号 = 一号一链接：
-    // 每个 Google 账号 Remix 一份 applet，各自链接存进名册，酒馆下拉栏点名字直达。
-    // 文件仍是 applet-url.json：{ list: [{name, url}], active, url }，
-    // 其中 url 字段永远镜像 active 那条，旧版扩展的 GET /applet-url 不受影响。
+    // 用户自己的 Applet 副本链接。
+    // 2026-08-12 AI Studio 改版后手机端只能从站内 My apps 列表进 app，多账号切换在
+    // 站内完成（退出→登录→点自己的 Remix），不再按号存链接；v1.4.0 起扩展只用单链接
+    // （PC 直达）。文件仍是 applet-url.json：{ list: [{name, url}], active, url }，
+    // url 字段镜像 active 那条；/applet-urls 名册端点保留，兼容 v1.3 旧扩展。
     const APPLET_URL_FILE = path.join(__dirname, 'applet-url.json');
     const APPLET_URL_RE = /^https:\/\/(aistudio\.google\.com|ai\.studio)\/apps\//;
 
@@ -453,6 +492,12 @@ class ProxyServer extends EventEmitter {
       const headerMsg = await queue.pop();
       
       if (aborted) return;
+
+      // 配额 429：通知扩展页弹换号提醒
+      if ((headerMsg.status || 0) === 429) {
+        log.warn(`[${requestId.slice(-6)}] 收到 429，广播换号提醒`);
+        this.broadcastEvent('quota', { status: 429 });
+      }
 
       if (headerMsg.event_type === 'error') {
         return res.status(headerMsg.status || 500).json({ error: headerMsg.message });
