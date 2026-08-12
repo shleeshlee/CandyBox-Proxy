@@ -178,25 +178,27 @@ cd ~/SillyTavern && node server.js
 
 > 安装脚本会尽量自动重启/启动并做健康检查；如果你是在非交互环境里安装，通常仍需要手动执行这一步
 
-### 2. 办证（每个 Google 账号做一次，要用电脑）
+### 2. 复制applet（重要！！！手机端使用必做，pc端可忽略，要用电脑浏览器）
 
-2026-08 AI Studio 改版后，手机浏览器直接打开 app 链接会卡在 Remix 引导页，所以每个账号先在电脑上拷一份自己的副本：
+ AI Studio 改版后，手机浏览器直接打开 app 链接会卡在 Remix 引导页，所以先在电脑上拷副本。**每个要用的账号都各复制一份（一号一份）**：
 
-1. PC 浏览器登录这个账号，打开公共 Applet 链接（点扩展面板的 **⚡ PC 直达** 即可）
-2. 手动点 **Remix** → 确认 AI Studio 的 **My apps（By you）** 里出现了副本
+1. PC 浏览器打开公共 Applet 链接 [公共链接直达](https://ai.studio/apps/09f6ee61-3e9e-4123-8d22-b1b473593d82) ，登录需要复制applet的账号
+2. 点 **Remix** → 确认 AI Studio 的 **My apps** 里出现了remix的副本
+3. 换一个账号登录，重复 1-2，直到每个要用的账号都有自己的副本
 
-### 3. 打开 Applet
+### 3. 使用代理
 
-- **电脑**：点扩展面板的 **CandyBox Proxy ⚡ PC 直达** 横条，直接打开。想固定用自己的副本，把副本的公共链接粘贴到面板输入框保存
-- **手机**：点面板的 **📱 AI Studio 入口** → 在 **My apps** 列表里点你 Remix 的副本（手机上只有这条路能进，链接直开会卡 Remix 页）
+- **电脑**：点击 酒馆 扩展面板的 **CandyBox Proxy ⚡ PC 直达** 横条，直接打开
+- **手机**：点击 酒馆 扩展面板的 **📱 AI Studio 入口**（先remix后使用）→ 登录复制了applet的账号 → 点你 Remix 的副本
 
 打开后首次点击 Allow 允许权限，然后点击「**连接服务**」
 
-### 4. 换号（额度 429 了才需要）
+### 4. 换号（重要！！！）
 
-1. 关掉当前 Applet 页面
-2. 点 **📱 AI Studio 入口** → 头像 → **退出**当前账号（必须退出再登录，点"切换账号"无效）→ 登下一个号
-3. My apps → 点这个号的副本 → 连接服务
+1. 点击代理页标题栏的 **退出** 功能按钮 → 退出当前账号 → 登录要换的账号
+2. 点 **📱 AI Studio 入口** → 点击remix副本进入代理页 → 连接服务
+
+> 小技巧：退出登录后直接刷新原代理页有时也能直接换号成功，卡在 Remix 页或找不到页面时，按第 2 步重进即可
 
 > 收到 429 时酒馆里会弹提示提醒你换号
 
@@ -204,7 +206,7 @@ cd ~/SillyTavern && node server.js
 
 1. **API连接配置** → **聊天补全** → 聊天补全来源 **Google AI Studio**
 2. **反向代理** 下拉框选择「**CandyBox**」
-3. 选择模型（如 `gemini-2.0-flash`）
+3. 选择模型（如 `gemini-3.5-flash`）
 4. 开始聊天
 
 ---
@@ -229,6 +231,14 @@ cd ~/SillyTavern && node server.js
 ```bash
 curl -sL https://raw.githubusercontent.com/shleeshlee/CandyBox-Proxy/main/install.sh | bash
 ```
+
+或者轻量更新（v1.4.4 起服务端启动时会自动同步扩展）：
+
+```bash
+cd ~/SillyTavern/plugins/CandyBox && git pull
+```
+
+然后重启酒馆。
 
 **Q: 怎么卸载？**
 
@@ -291,7 +301,7 @@ CandyBox-Proxy/
 │   ├── index.js      # 扩展入口
 │   ├── style.css
 │   └── manifest.json
-├── manifest.json     # 根 manifest（扩展直装用）
+├── manifest.json     # 根 manifest
 ├── install.sh        # 一键安装脚本
 ├── uninstall.sh      # 卸载脚本
 ├── setup.sh          # 本地安装脚本
